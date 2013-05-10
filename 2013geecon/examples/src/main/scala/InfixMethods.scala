@@ -6,10 +6,13 @@ import scala.annotation._
 
    // Operators as Methods
    object BigInt {   	  
-   	def apply(v: Int): BigInt = 
-   	  new BigInt(new BigInteger(v.toString))
+   	 def apply(v: Int): BigInt =
+   	   new BigInt(new BigInteger(v.toString))
 
-   	def apply(v: BigInteger): BigInt = new BigInt(v)
+   	 def apply(v: BigInteger): BigInt = new BigInt(v)
+
+     implicit def liftBigInt(t: BigInteger) = BigInt(t)
+     implicit def intToBigInt(t: Int) = BigInt(t)
    }
 
    class BigInt(val v: BigInteger) {
@@ -22,13 +25,12 @@ import scala.annotation._
      def *(that: BigInt): BigInt = BigInt(v multiply that.v)
      def *(that: Int): BigInt = this * BigInt(that)
 
-     def unary_-(): BigInt = BigInt(0) - this     
+     def unary_-(): BigInt = BigInt(0) - this
      def !(): BigInt = if ((BigInteger.ONE compareTo this.v) == 1)
         BigInt(1)
       else
         this * (this - 1).!
      
-     def +:(b: BigInt): BigInt = b
      override def toString: String = v.toString
    }
 
@@ -39,17 +41,10 @@ object Main extends App {
    println(res)
    
    // Slide 3
-   println(-BigInt(3).! + (BigInt(4)!) * (BigInt(2)!))
-
-   implicit def liftBigInt(t: BigInteger) = BigInt(t)
-   implicit def intToBigInt(t: Int) = BigInt(t)
+   println(-BigInt(3).! + (BigInt(4)!) * (BigInt(2)!))   
 
    val v = new BigInteger("3")
    println(-(v!) + (4!) * (2!))
-
-   var bi = BigInt(1)
-   bi +:= 3
-   println(bi)
-
+   
    ()
 }
