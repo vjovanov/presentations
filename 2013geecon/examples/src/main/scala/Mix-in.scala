@@ -1,11 +1,13 @@
+trait Node
+trait Edge
+
 trait Graph {
   type Node[T]
+  val t : List[(Long, Node)]
+  def toAtom()
 
-  var nodes = List[Node[_]]
-  
-  def insert(t: Node[T]) = nodes += t
 }
 
+trait Dag {
 
-
-// Adding abstract types
+}
