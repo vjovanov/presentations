@@ -16,7 +16,10 @@
 
 		<link rel="stylesheet" href="css/reveal.min.css">
 		<link rel="stylesheet" href="css/theme/default.css" id="theme">
-
+		<link rel="stylesheet" href="css/custom.css">
+		<style>
+		 .reveal section img .plainimage1 img{border:0; opacity:0; width: 100px;}
+        </style>
 		<!-- For syntax highlighting -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
 
@@ -46,55 +49,49 @@
 					<h1>Yin-Yang</h1>
 					<h3>Programming DSLs Made Simple</h3>
 					<p>
-						<small>Created by <a href="http://vjovanov.com">Vojin Jovanovic</a> / <a href="http://twitter.com/vojjov">@vojjov</a></small>
+						<small>By&nbsp&nbsp<a href="http://vjovanov.com">Vojin Jovanovic</a>&nbsp&nbsp/&nbsp&nbsp<a href="http://twitter.com/vojjov">@vojjov</a></small>
 					</p>
 				</section>
 
 				<section>
-					<section>
-					<h2>Domain-Specific languages</h2>
+				<section>
+					<h2>Domain-Specific Programming Languages</h2>
 					<p>
-					 Utilizing domain-specific knowledge:
+					 Restricting the language to achieve both good productivity and good performance.
 					</p>
-					<ol>
-						<li>Performance</li>
-						<li>Error reporting</li>
-					</ol>
-
 					<aside class="notes">
 						Talk about domain specific languages in general!
 					</aside>
-					</section>
+				</section>
 
-				<section>
-					<h2>DSL User</h2>
-					<p>
-						All is good!
-					</p>
-					<pre><code data-trim contenteditable>
-function linkify( selector ) {
-  if( supports3DTransforms ) {
-
-    var nodes = document.querySelectorAll( selector );
-
-    for( var i = 0, len = nodes.length; i &lt; len; i++ ) {
-      var node = nodes[i];
-
-      if( !node.className ) {
-        node.className += ' roll';
-      }
-    }
-  }
-}
+                <section>
+					<h2>Example: Standard Query Language</h2>
+					<pre><code data-trim contenteditable class="sql lasso">
+SELECT name, phone, email
+FROM   personnel, programmers
+WHERE  pers_id = prog_id
+  AND language = "Scala"
+  AND level > 30
 					</code></pre>
-
+					<img src="query-plan.png"></img>
+				</section>
+				<section>
+					<h2>For a <i>DSL User</i></h2>
+					<ul>
+						<li>Good usability</li>
+						<li>Good performance</li>
+				    </ul>
 				</section>
 
 				<section>
-					<h2>DSL Author</h2>
-					<p>
-						TODO: Bleeding fingers gif!
-					</p>
+					<h2>For a <i>DSL Author</i></h2>
+					<p>A DSL author must: </p>
+					<ul>
+						<li>Implement a parser</li>
+						<li>Implement a typechecker</li>
+						<li>Implement a debugger</li>
+						<li>Provide IDE integration</li>
+				    </ul>
 				</section>
 
 
@@ -104,200 +101,345 @@ function linkify( selector ) {
 				<section>
 					<section>
 						<h2>Embedded Domain-Specific Languages</h2>
-						<p>
-						</p>
+						<p>Reuse the existing general purpose <i>host language</i> to design a DSL.</p>
 					</section>
 					<section>
 						<h2>Direct Embedding</h2>
-						<p>Values in the object language are directly represented by the values in the host language.</p>
+						<p>Values in the embedded language are directly represented by the values in the host language.</p>
 					</section>
 					<section>
 						<h2>Direct Embedding - Performance</h2>
-						<p>Abstraction overhead!</p>
+						<p>Large abstraction overhead:</p>
+						<pre><code data-trim contenteditable class="scala">
+val v1 = Vector(1,2,3)
+val v2 = Vector(4,5,6)
+val sum = (v1 zip v2).foldLeft(0)(_ + _)
+val (min, max) = sum.foldLeft((sum(0), sum(0))) {
+  case ((minV, maxV), v) =>
+    (min(minV, a), max(maxV, a))
+}
+					</code></pre>
 					</section>
 					<section>
 						<h2>Deep Embedding</h2>
-						<p>Values in the object language are symbolically represented in the host language.</p>
+						<p>Values in the embedded language are symbolically represented by the values in the host language.</p>
+						<p>&nbsp</p>
+						<pre><code data-trim contenteditable class="scala">
+trait Exp[T] // symbolic representation
+type Rep[T] = Exp[T]
+case class Const(v: Int) extends Exp[Int]
+implicit def liftInt(i: Int): Rep[Int] = Const(i)
+
+val x: Rep[Int] = 1
+</code></pre>
 					</section>
 					<section>
 				  	  <h2>Deep Embedding - Debugging</h2>
-				  	  <p>
-					  </p>
+				  	  <img src="debug11.png"></img>
+				  	  <img src="debug2.png"></img>
 				    </section>
 				    <section>
 				  	  <h2>Deep Embedding - Type Errors</h2>
-				  	  <p>
-					  </p>
+<pre><code data-trim contenteditable class="scala">
+Query(Coffees).map(c =>
+  if(c.origin == "Iran")
+    "Good"
+  else
+    c.quality
+)
+
+Errors:
+Don’t know how to unpack Any to T and pack to G
+
+Not enough arguments for method map: (implicit shape:
+		scala.slick.lifted.Shape[Any,T,G])scala.slick.lifted.Query[G,T].
+Unspeciﬁed value parameter
+</code></pre>
+
+
+</code></pre>
+				  	  <!--<div class="stretch">
+                        <iframe src="http://localhost:9000" height="100%" width="100%" />
+                      </div>-->
 				    </section>
 				</section>
 				<section>
-				  	  <h2>Direct Embedding vs. Deep Embedding</h2>
-				  	  <p>
-				  	  	Table
-					  </p>
+				<section>
+                    <h2>Direct Embedding vs. Deep Embedding</h2>
+				  	<table class="reveal" >
+				  		<thead>
+				  			<tr><th></th><th>Deep</th><th>Direct</th></tr>
+				  		</thead>
+				  	  <tbody>
+				  	  	<tr><td>Usability</td><td align="center"><font color="red">X</font></td><td><font color="green">✓</font></td></tr>
+				  	  	<tr><td>Performance</td><td align="center"><font color="green">✓</font></td><td><font color="red">X</font></td></tr>
+				  		</tbody>
+					</table>
 				</section>
+				<section>
+                    <p>Usability is important during program development!</p>
+                    <p>Performance is important in production!</p>
+				</section>
+				<section>
+                    <p>Translate direct embedding to deep embedding in production!</p>
+				</section>
+			   </section>
 
 				<section>
-				  	  <h2>Yin-Yang Picture</h2>
-				  	  <p>
-				  	  	Table
-					  </p>
+				  	  	<img src="yinyang-transparent.png" class="plainimage1" alt="yin-yang">
 				</section>
-
 				<section>
-				  <h2>Two code examples:</h2>
-				  <p>
-				  	Table
+				<section>
+				  <h2>Spot the difference</h2>
+				  <table class="reveal" >
+				  		<thead>
+				  			<tr><th>Direct</th><th>Deep</th></tr>
+				  		</thead>
+				  	  <tbody>
+				  	  	<tr><td><pre><code data-trim contenteditable class="scala">
+{
+  Query(Coffees).map(c =>
+    if(c.origin == "Iran")
+      "Good"
+    else
+      c.quality
+  )
+}
+					</code></pre>
+				  	  	</td><td><pre><code data-trim contenteditable class="scala">
+query { // with scala-virtualized
+  Query(Coffees).map(c =>
+    if(c.origin == "Iran")
+      "Good"
+    else
+      c.quality
+  )
+}
+					</code></pre></td></tr>
+				  		</tbody>
+					</table>
+
 				  </p>
 				</section>
-
 				<section>
-				  <h2>Virtualization</h2>
-				  <p>
-				  	Table of rules!
+				  <h2>Spot the difference</h2>
+				  <table class="reveal" >
+				  		<thead>
+				  			<tr><th>Direct</th><th>Deep</th></tr>
+				  		</thead>
+				  	  <tbody>
+				  	  	<tr><td><pre><code data-trim contenteditable class="scala">
+{
+  Query(Coffees).map(c =>
+    if(c.origin == "Iran")
+      "Good"
+    else
+      c.quality
+  )
+}
+					</code></pre>
+				  	  	</td><td><pre><code data-trim contenteditable class="scala">
+query { // with scala-virtualized
+  Query(Coffees).map(c: Column[Coffes] =>
+    if(c.origin == unit("Iran"))
+      unit("Good")
+    else
+      c.quality
+  )
+}
+					</code></pre></td></tr>
+				  		</tbody>
+					</table>
+
 				  </p>
 				</section>
-				<section>
-				  <section>
-				    <h2>DSL Intrinsification</h2>
-				    <p>
-				      Table!
-				    </p>
-				  </section>
-				  <section>
-				    <h2>Operations!</h2>
-				    <p>
-				    	Math!
-				    </p>
-				  </section>
-				  <section>
-				    <h2>Constants!</h2>
-				    <p>
-				    	Math!
-				    </p>
-				  </section>
-				  <section>
-				    <h2>Type Translation!</h2>
-				    <p>
-				    	Math!
-				    </p>
-				  </section>
-				  <section>
-				    <h2>Feature Analysis!</h2>
-				    <p>
-
-				    </p>
-				</section>
-				</section>
-
-				<section>
-				    <h2>Usage!</h2>
-				    <p>
-				    	Math!
-				    </p>
-				</section>
-
-				<section>
-				    <h2>Work flow!</h2>
-				    <p>
-				    	Math!
-				    </p>
 				</section>
 				<section>
 				  <section>
-				    <h2>Slick face lift!</h2>
-				    <p>
-				    	Math!
-				    </p>
-				  </section>
-				  <section>
-				    <h2>New interface!</h2>
-				    <p>
-				    	Math!
-				    </p>
-				  </section>
-				  <section>
-				    <h2>Effort!</h2>
-				    <p>
-				    	Math!
-				    </p>
-				  </section>
-				  <section>
-				    <h2>Performance!</h2>
-				    <p>
-				    	Math!
-				    </p>
+				    <h2>Language Virtualization</h2>
+				    <table class="reveal" >
+				  		<thead>
+				  			<tr><th></th><th>Direct</th><th>Deep</th></tr>
+				  		</thead>
+				  	  <tbody>
+				  	  	<tr>
+				  	  		<td>Language Constructs</td>
+				  	  		<td></td>
+				  	  		<td></td>
+				  	  	</tr>
+				  	  	<tr>
+				  	  		<td></td>
+				  	  		<td>if(c) t else e</td>
+				  	  		<td>__if(c, t, e)</td>
+				  	  	</tr>
+				  	  	<tr>
+				  	  		<td></td>
+				  	  		<td>while(c) b</td>
+				  	  		<td>__while(c, b)</td>
+				  	  	</tr>
+				  	  	<tr>
+				  	  		<td>Final Methods</td>
+				  	  		<td></td>
+				  	  		<td></td>
+				  	  	</tr>
+				  	  	<tr>
+				  	  		<td></td>
+				  	  		<td>x.hashCode</td>
+				  	  		<td>__hashCode(x)</td>
+				  	  	</tr>
+				  	  	<tr>
+				  	  		<td></td>
+				  	  		<td>a == b</td>
+				  	  		<td>__==(a, b)</td>
+				  	  	</tr>
+				  		</tbody>
+					</table>
 				  </section>
 			    </section>
 				<section>
-				    <h2>Generation!</h2>
+				  <section>
+				    <h2>DSL Intrinsification</h2>
+				    <p>Converts DSL intrinsics (operations and types) from the direct embedding into their deep counterparts.</p>
+				  </section>
+				  <section>
+				    <h2>Operation Translation</h2>
 				    <p>
-				    	Math!
+				    </p>
+				  </section>
+				  <section>
+				    <h2>Constants Intrinsification</h2>
+				    <p>
+				    	We use a type class based approach.
+				    </p>
+				  </section>
+				  <section>
+				    <h2>Type Translation: Generic Embedding</h2>
+				    <p>
+				       \[\begin{aligned}
+				       &\tau(T, \mathtt{targ}) & = & \; T \\
+					   &\tau(T, \mathtt{other}) & = & \; Rep [ T ]
+                         \end{aligned}\]
+				    </p>
+				  </section>
+				  <section>
+				    <h2>Type Translation: Automatic Inlining</h2>
+				    <p>
+
+				       \[\begin{aligned}
+
+&\tau(T_1 \Rightarrow T_2, \mathtt{targ}) &=& \; \mathtt{error} \\
+&\tau(T_1 \Rightarrow T_2, \mathtt{other}) & = & \; \tau(T_1,\mathtt{other}) \Rightarrow \tau(T_2,\mathtt{other}) \\
+&\tau(T, \mathtt{targ}) & = & \; T \\
+&\tau(T, \mathtt{other}) & = & \; Rep[T]
+                         \end{aligned}\]
+				    </p>
+				  </section>
+				  <section>
+				    <h2>Language Restriction</h2>
+				    <p>Direct embedding API can be richer than the DSL.
+				    </p>
+				    <p>For each function we assure deep embedding exists.</p>
+				</section>
+				</section>
+
+				<section>
+				<section>
+				    <h2>DSL User View</h2>
+				    <pre><code data-trim contenteditable class="scala">
+query {
+  Query(Coffees).map(c =>
+    if(c.origin == "Iran")
+      "Good"
+    else
+      c.quality
+  )
+}
+					</code></pre>
+				</section>
+				<section>
+				    <h2>DSL Author View</h2>
+				    <pre><code data-trim contenteditable class="scala">
+object YYTransformer {
+  def apply[C <: Context, T](c: C)(
+    dslName: String,
+    tpeTransformer: TypeTransformer[c.type],
+    config: Map[String, Any] = Map()) = ...
+}
+</code></pre>
+<pre><code data-trim contenteditable class="scala">
+def query[T](block: => T): T = macro _query[T]
+def _query[T](c: Context)(block: c.Expr[T]): c.Expr[T] =
+  YYTransformer[c.type, T](c)(
+    "slick.Query",
+    new RepTransformer[c.type](c))(block)
+</code></pre>
+				</section>
+				</section>
+
+				<section>
+				    <h2>Yin-Yang: Work Flow</h2>
+				    <img src="workflow.png"></img>
+				</section>
+				<section>
+				  <section>
+				    <h2>Experiment: Slick Front-End</h2>
+				    <p>Existing deep embedding based on Rep types</p>
+				  </section>
+				  <section>
+				    <h2>Slick Queries</h2>
+
+				  </section>
+				  <section>
+				    <h2>New interface</h2>
+				    <pre><code data-trim contenteditable class="scala">
+class Query[T] {
+  def length: Int = ???
+  def map[S](projection: T => S): Query[S] = ???
+  def filter(projection: T => Boolean): Query[T] = ???
+  def withFilter(projection: T => Boolean): Query[T] = ???
+  def flatMap[S](projection: T => Query[S]): Query[S] = ???
+  ...
+  def groupBy[S](f: T => S): Query[(S, Query[T])] = ???
+  def innerJoin[S](q2: Query[S]): JoinQuery[T, S] = ???
+  def leftJoin[S](q2: Query[S]): JoinQuery[T, S] = ???
+  def rightJoin[S](q2: Query[S]): JoinQuery[T, S] = ???
+  def outerJoin[S](q2: Query[S]): JoinQuery[T, S] = ???
+}
+</code></pre>
+				</section>
+				  <section>
+				  	<h2>Development Effort</h2>
+				    <p>Implementation took 2 months of effort:</p>
+				    <ul>
+						<li>400 lines of code</li>
+						<li>50+ tests are passing</li>
+					</ul>
+				  </section>
+				  <!-- TODO make it smoother! -->
+				  <section>
+				    <h2>Performance Improvement</h2>
+				    <img src="slick-performance.png"></img>
+				  </section>
+			    </section>
+				<section>
+				    <h2>Deep Embedding Generation</h2>
+				    <p>
 				    </p>
 				</section>
 
 				<section>
 					<h2>Demo</h2>
 				</section>
+				<section>
+					<h2>Takeaways</h2>
+				</section>
 
 				<section>
 					<h1>THE END</h1>
 					<p>Yin-Yang / http://github.com/vjovanov/yin-yang</p>
-					<p>By Vojin Jovanovic / @vojjov / vjovanov.com</p>
-
-				</section>
-								<section>
-					<h2>Point of View</h2>
-					<p>
-						Press <strong>ESC</strong> to enter the slide overview.
-					</p>
-					<p>
-						Hold down alt and click on any element to zoom in on it using <a href="http://lab.hakim.se/zoom-js">zoom.js</a>. Alt + click anywhere to zoom back out.
-					</p>
+					<p>By &nbsp&nbsp<a href="http://vjovanov.com">Vojin Jovanovic</a>&nbsp&nbsp/&nbsp&nbsp<a href="http://twitter.com/vojjov">@vojjov</a></p>
 				</section>
 
-				<section>
-					<h2>Works in Mobile Safari</h2>
-					<p>
-						Try it out! You can swipe through the slides and pinch your way to the overview.
-					</p>
-				</section>
-
-				<section>
-					<h2>Marvelous Unordered List</h2>
-					<ul>
-						<li>No order here</li>
-						<li>Or here</li>
-						<li>Or here</li>
-						<li>Or here</li>
-					</ul>
-				</section>
-
-				<section>
-					<h2>Fantastic Ordered List</h2>
-					<ol>
-						<li>One is smaller than...</li>
-						<li>Two is smaller than...</li>
-						<li>Three!</li>
-					</ol>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-						## Markdown support
-
-						For those of you who like that sort of thing. Instructions and a bit more info available [here](https://github.com/hakimel/reveal.js#markdown).
-
-						```
-						<section data-markdown>
-						  ## Markdown support
-
-						  For those of you who like that sort of thing.
-						  Instructions and a bit more info available [here](https://github.com/hakimel/reveal.js#markdown).
-						</section>
-						```
-					</script>
-				</section>
 
 				<section id="transitions">
 					<h2>Transition Styles</h2>
@@ -375,20 +517,6 @@ Reveal.addEventListener( 'customevent', function() {
 					</section>
 				</section>
 
-				<section data-transition="linear" data-background="#4d7e65" data-background-transition="slide">
-					<h2>Background Transitions</h2>
-					<p>
-						Pass reveal.js the <code>backgroundTransition: 'slide'</code> config argument to make backgrounds slide rather than fade.
-					</p>
-				</section>
-
-				<section data-transition="linear" data-background="#8c4738" data-background-transition="slide">
-					<h2>Background Transition Override</h2>
-					<p>
-						You can override background transitions per slide by using <code>data-background-transition="slide"</code>.
-					</p>
-				</section>
-
 				<section>
 					<h2>Clever Quotes</h2>
 					<p>
@@ -399,35 +527,6 @@ Reveal.addEventListener( 'customevent', function() {
 						&ldquo;For years there has been a theory that millions of monkeys typing at random on millions of typewriters would
 						reproduce the entire works of Shakespeare. The Internet has proven this theory to be untrue.&rdquo;
 					</blockquote>
-				</section>
-
-				<section>
-					<h2>Pretty Code</h2>
-					<pre><code data-trim contenteditable>
-function linkify( selector ) {
-  if( supports3DTransforms ) {
-
-    var nodes = document.querySelectorAll( selector );
-
-    for( var i = 0, len = nodes.length; i &lt; len; i++ ) {
-      var node = nodes[i];
-
-      if( !node.className ) {
-        node.className += ' roll';
-      }
-    }
-  }
-}
-					</code></pre>
-					<p>Courtesy of <a href="http://softwaremaniacs.org/soft/highlight/en/description/">highlight.js</a>.</p>
-				</section>
-
-				<section>
-					<h2>Intergalactic Interconnections</h2>
-					<p>
-						You can link between slides internally,
-						<a href="#/2/3">like this</a>.
-					</p>
 				</section>
 
 				<section>
@@ -506,6 +605,11 @@ function linkify( selector ) {
 				// Parallax scrolling
 				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
 				// parallaxBackgroundSize: '2100px 900px',
+                math: {
+                    mathjax: 'http://cdn.mathjax.org/mathjax/latest/MathJax.js',
+                    config: 'TeX-AMS_HTML-full'  // See http://docs.mathjax.org/en/latest/config-files.html
+                },
+
 
 				// Optional libraries used to extend on reveal.js
 				dependencies: [
@@ -514,7 +618,8 @@ function linkify( selector ) {
 					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
 					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
 					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
-					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/math/math.js', async: true }
 				]
 			});
 
