@@ -15,10 +15,12 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 		<link rel="stylesheet" href="css/reveal.min.css">
-		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+		<link rel="stylesheet" href="css/theme/solarized.css" id="theme">
 		<link rel="stylesheet" href="css/custom.css">
+		<link rel="stylesheet" href="css/print/pdf.css">
+
 		<style>
-		 .reveal section img .plainimage1 img{border:0; opacity:0; width: 100px;}
+		 .reveal section img .plainimage1 img{border:0; opacity:0;}
         </style>
 		<!-- For syntax highlighting -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
@@ -49,120 +51,136 @@
 					<h1>Yin-Yang</h1>
 					<h3>Programming DSLs Made Simple</h3>
 					<p>
-						<small>By&nbsp&nbsp<a href="http://vjovanov.com">Vojin Jovanovic</a>&nbsp&nbsp/&nbsp&nbsp<a href="http://twitter.com/vojjov">@vojjov</a></small>
+						By&nbsp&nbsp<a href="http://vjovanov.com">Vojin Jovanovic</a>&nbsp&nbsp/&nbsp&nbsp<a href="http://twitter.com/vojjov">@vojjov</a>
 					</p>
 				</section>
 
 				<section>
-				<section>
-					<h2>Domain-Specific Programming Languages</h2>
-					<p>
-					 Restricting the language to achieve both good productivity and good performance.
+				  <section>
+				  	<h2>Domain-Specific Programming Language</h2>
+				  	<p>
+				  	   Programming language restricted to a narrow domain in order to improve both productivity and performance.
 					</p>
 					<aside class="notes">
 						Talk about domain specific languages in general!
 					</aside>
-				</section>
+				  </section>
 
-                <section>
+                  <section>
 					<h2>Example: Standard Query Language</h2>
 					<pre><code data-trim contenteditable class="sql lasso">
-SELECT name, phone, email
-FROM   personnel, programmers
-WHERE  pers_id = prog_id
-  AND language = "Scala"
-  AND level > 30
+SELECT name, email
+FROM   gmail_accounts as m, github_account as g
+WHERE  m.username = g.username
+  AND prog_language = "Scala"
+  AND lang_level > 30
 					</code></pre>
-					<img src="query-plan.png"></img>
-				</section>
-				<section>
-					<h2>For a <i>DSL User</i></h2>
+				  </section>
+				  <section>
+					<h2>SQL: Domain Knowledge</h2>
+					<p>Rewrites can change performance by a factor of 1000:</p>
 					<ul>
-						<li>Good usability</li>
-						<li>Good performance</li>
+					  <li>$R \bowtie S = S \bowtie R$</li>
+					  <li>$(R \bowtie S) \bowtie T = R \bowtie (S \bowtie T)$</li>
+					</ul>
+			      </section>
+
+			      <section>
+				    <h2>A DSL should be:</h2>
+				    <ul>
+				      <li>User Friendly</li>
+				      <li>Fast</li>
 				    </ul>
+				  </section>
+
+				  <section>
+				  	<h2>Meet the <i>DSL User</i></h2>
+				  	<img src="elon.jpg"></img>
+				  </section>
+
+				  <section>
+				  	<p>However, a DSL <i>author</i> should: </p>
+				  	<ul>
+				  		<li>Implement a parser</li>
+				  		<li>Implement a typechecker</li>
+				  		<li>Implement a debugger</li>
+				  		<li>Provide IDE integration</li>
+				      </ul>
+				  </section>
+
+				  <section>
+				    <h2>Meet the <i>DSL Authors</i></p>
+				    <img src="dsl-author.jpg"></img>
+				  </section>
+
 				</section>
-
-				<section>
-					<h2>For a <i>DSL Author</i></h2>
-					<p>A DSL author must: </p>
-					<ul>
-						<li>Implement a parser</li>
-						<li>Implement a typechecker</li>
-						<li>Implement a debugger</li>
-						<li>Provide IDE integration</li>
-				    </ul>
-				</section>
-
-
-				</section>
-
-				<!-- Example of nested vertical slides -->
 				<section>
 					<section>
 						<h2>Embedded Domain-Specific Languages</h2>
-						<p>Reuse the existing general purpose <i>host language</i> to design a DSL.</p>
+						<p>Use an existing general purpose <i>host language</i> to embed a DSL.</p>
 					</section>
 					<section>
 						<h2>Direct Embedding</h2>
 						<p>Values in the embedded language are directly represented by the values in the host language.</p>
 					</section>
 					<section>
-						<h2>Direct Embedding - Performance</h2>
-						<p>Large abstraction overhead:</p>
+						<h2>Direct Embedding - Low Performance</h2>
+						<p>Large abstraction overhead. Example the Scala collections:</p>
 						<pre><code data-trim contenteditable class="scala">
-val v1 = Vector(1,2,3)
-val v2 = Vector(4,5,6)
-val sum = (v1 zip v2).foldLeft(0)(_ + _)
-val (min, max) = sum.foldLeft((sum(0), sum(0))) {
-  case ((minV, maxV), v) =>
-    (min(minV, a), max(maxV, a))
-}
+val v1 = Seq(1,2,3)
+val v2 = Seq(4,5,6)
+val sum = (v1 zip v2) map { case (x, y) => x + y }
+val (min, max) = (sum.max, sum.min)
 					</code></pre>
 					</section>
 					<section>
 						<h2>Deep Embedding</h2>
 						<p>Values in the embedded language are symbolically represented by the values in the host language.</p>
-						<p>&nbsp</p>
+						<p>&nbsp;</p>
 						<pre><code data-trim contenteditable class="scala">
-trait Exp[T] // symbolic representation
-type Rep[T] = Exp[T]
-case class Const(v: Int) extends Exp[Int]
-implicit def liftInt(i: Int): Rep[Int] = Const(i)
+// symbolic representation
+trait Rep[T]
+case class Const(v: Int) extends Rep[Int]
+case class Minus(l: Rep[Int], r: Rep[Int]) extends Rep[Int]
+// lifting
+implicit def lift(i: Int): Rep[Int] = Const(i)
+implicit class IntOps(l: Rep[Int]) {
+  def -(r: Rep[Int]): Rep[Int] = Minus(l, r)
+}
 
-val x: Rep[Int] = 1
+val y: Rep[Int] = 1024
+val x: Rep[Int] = y - 1
+println(x)
 </code></pre>
 					</section>
 					<section>
-				  	  <h2>Deep Embedding - Debugging</h2>
+				  	  <h2>Deep Embedding - Troubles Debugging</h2>
 				  	  <img src="debug11.png"></img>
 				  	  <img src="debug2.png"></img>
 				    </section>
 				    <section>
-				  	  <h2>Deep Embedding - Type Errors</h2>
+
+				  	  <h2>Deep Embedding - Cryptic Type Errors</h2>
 <pre><code data-trim contenteditable class="scala">
 Query(Coffees).map(c =>
-  if(c.origin == "Iran")
+  if(c.origin == "CH")
     "Good"
   else
     c.quality
 )
-
-Errors:
-Don’t know how to unpack Any to T and pack to G
-
-Not enough arguments for method map: (implicit shape:
-		scala.slick.lifted.Shape[Any,T,G])scala.slick.lifted.Query[G,T].
-Unspeciﬁed value parameter
 </code></pre>
+<ul>
+	<li>Don’t know how to unpack Any to T and pack to G</li>
+	<li>Not enough arguments for method map: (implicit shape: scala.ql.lifted.Shape[Any,T,G]):scala.slick.lifted.Query[G,T]</li>
+</ul>
 
 
-</code></pre>
-				  	  <!--<div class="stretch">
-                        <iframe src="http://localhost:9000" height="100%" width="100%" />
-                      </div>-->
-				    </section>
+
+
+</p>
+				     </section>
 				</section>
+
 				<section>
 				<section>
                     <h2>Direct Embedding vs. Deep Embedding</h2>
@@ -171,26 +189,29 @@ Unspeciﬁed value parameter
 				  			<tr><th></th><th>Deep</th><th>Direct</th></tr>
 				  		</thead>
 				  	  <tbody>
-				  	  	<tr><td>Usability</td><td align="center"><font color="red">X</font></td><td><font color="green">✓</font></td></tr>
-				  	  	<tr><td>Performance</td><td align="center"><font color="green">✓</font></td><td><font color="red">X</font></td></tr>
+				  	  	<tr><td>Friendly</td><td align="center"><font color="red">X</font></td><td><font color="green">✓</font></td></tr>
+				  	  	<tr><td>Fast</td><td align="center"><font color="green">✓</font></td><td><font color="red">X</font></td></tr>
 				  		</tbody>
 					</table>
 				</section>
 				<section>
-                    <p>Usability is important during program development!</p>
-                    <p>Performance is important in production!</p>
+					<h2>Insight</h2>
+                    <p>User friendliness matters during program development.</p>
+                    <p>Performance matters in production.</p>
 				</section>
 				<section>
-                    <p>Translate direct embedding to deep embedding in production!</p>
+                    <p>Automatically <i>translate</i> a friendly direct embedding to a fast deep embedding before deployment!</p>
 				</section>
 			   </section>
 
 				<section>
-				  	  	<img src="yinyang-transparent.png" class="plainimage1" alt="yin-yang">
+					<h2>Automatic Translation</h2>
+				  	<img src="yinyang-transparent.png" width="550" height="550" class="plainimage1" alt="yin-yang">
 				</section>
 				<section>
 				<section>
-				  <h2>Spot the difference</h2>
+				  <h2 class="fragment fade-out">Spot the difference</h2>
+				  <h2 class="fragment roll-in">Behind the Scenes</h2>
 				  <table class="reveal" >
 				  		<thead>
 				  			<tr><th>Direct</th><th>Deep</th></tr>
@@ -198,8 +219,8 @@ Unspeciﬁed value parameter
 				  	  <tbody>
 				  	  	<tr><td><pre><code data-trim contenteditable class="scala">
 {
-  Query(Coffees).map(c =>
-    if(c.origin == "Iran")
+  Query(Coffees).map(c =>   |
+    if(c.origin == "CH")
       "Good"
     else
       c.quality
@@ -207,42 +228,10 @@ Unspeciﬁed value parameter
 }
 					</code></pre>
 				  	  	</td><td><pre><code data-trim contenteditable class="scala">
-query { // with scala-virtualized
+query { // scala-virtualized   |
   Query(Coffees).map(c =>
-    if(c.origin == "Iran")
+    if(c.origin == "CH")
       "Good"
-    else
-      c.quality
-  )
-}
-					</code></pre></td></tr>
-				  		</tbody>
-					</table>
-
-				  </p>
-				</section>
-				<section>
-				  <h2>Spot the difference</h2>
-				  <table class="reveal" >
-				  		<thead>
-				  			<tr><th>Direct</th><th>Deep</th></tr>
-				  		</thead>
-				  	  <tbody>
-				  	  	<tr><td><pre><code data-trim contenteditable class="scala">
-{
-  Query(Coffees).map(c =>
-    if(c.origin == "Iran")
-      "Good"
-    else
-      c.quality
-  )
-}
-					</code></pre>
-				  	  	</td><td><pre><code data-trim contenteditable class="scala">
-query { // with scala-virtualized
-  Query(Coffees).map(c: Column[Coffes] =>
-    if(c.origin == unit("Iran"))
-      unit("Good")
     else
       c.quality
   )
@@ -255,6 +244,10 @@ query { // with scala-virtualized
 				</section>
 				</section>
 				<section>
+				  <section>
+				  	<h2>The Core Translation</h2>
+				  	<img src="core-trans.jpg"></img>
+				  </section>
 				  <section>
 				    <h2>Language Virtualization</h2>
 				    <table class="reveal" >
@@ -278,19 +271,19 @@ query { // with scala-virtualized
 				  	  		<td>__while(c, b)</td>
 				  	  	</tr>
 				  	  	<tr>
-				  	  		<td>Final Methods</td>
+				  	  		<td><code>AnyRef</code> Methods</td>
 				  	  		<td></td>
 				  	  		<td></td>
 				  	  	</tr>
 				  	  	<tr>
 				  	  		<td></td>
 				  	  		<td>x.hashCode</td>
-				  	  		<td>__hashCode(x)</td>
+				  	  		<td>infix_hashCode(x)</td>
 				  	  	</tr>
 				  	  	<tr>
 				  	  		<td></td>
 				  	  		<td>a == b</td>
-				  	  		<td>__==(a, b)</td>
+				  	  		<td>infix_==(a, b)</td>
 				  	  	</tr>
 				  		</tbody>
 					</table>
@@ -299,18 +292,60 @@ query { // with scala-virtualized
 				<section>
 				  <section>
 				    <h2>DSL Intrinsification</h2>
-				    <p>Converts DSL intrinsics (operations and types) from the direct embedding into their deep counterparts.</p>
+				    <p>Converts DSL intrinsics from the direct embedding into their deep counterparts.</p>
 				  </section>
 				  <section>
 				    <h2>Operation Translation</h2>
-				    <p>
-				    </p>
+                    <ul>
+						<li>Injects the whole program into the DSL component</li>
+						<li>Replaces prefixes with <code>this</code></li>
+					</ul>
+					<table class="reveal" >
+				  		<thead>
+				  			<tr><th>Direct</th><th>Deep</th></tr>
+				  		</thead>
+				  	  <tbody>
+				  	  	<tr><td><pre><code data-trim contenteditable class="scala">
+query {
+  Query(Coffees).map(c =>  |
+    if(c.origin == "CH")
+      "Good"
+    else
+      c.quality
+  )
+}
+					</code></pre>
+				  	  	</td><td><pre><code data-trim contenteditable class="scala">
+new QueryDSL {
+  this.Query(Coffees).map(c =>   |
+    if(c.origin == "CH")
+      "Good"
+    else
+      c.quality
+  )
+}
+					</code></pre></td></tr>
+				  		</tbody>
+					</table>
 				  </section>
 				  <section>
-				    <h2>Constants Intrinsification</h2>
-				    <p>
-				    	We use a type class based approach.
-				    </p>
+				    <h2>Constants and Captured Variables</h2>
+</code></pre>
+<pre><code data-trim contenteditable class="scala">
+	def lift[T, Ret](v: T)
+	  (implicit liftEv: LiftEvidence[T, Ret]): Ret =
+      liftEv.lift(v)
+</code></pre>
+<pre><code data-trim contenteditable class="scala">
+new QueryDSL {
+  this.Query(Coffees).map(c =>
+    if(c.origin == "CH")
+      "Good"
+    else
+      c.quality
+  )
+}
+</code></pre>
 				  </section>
 				  <section>
 				    <h2>Type Translation: Generic Embedding</h2>
@@ -335,20 +370,47 @@ query { // with scala-virtualized
 				    </p>
 				  </section>
 				  <section>
-				    <h2>Language Restriction</h2>
-				    <p>Direct embedding API can be richer than the DSL.
+				    <h2>Correctness</h2>
+				    <p>
+						<img src="finallytagless.png"></img>
 				    </p>
-				    <p>For each function we assure deep embedding exists.</p>
+				  </section>
 				</section>
-				</section>
-
 				<section>
+				<section>
+				    <h2>Language Restriction Analysis</h2>
+				    <p>Direct embedding API can be richer than the deep embedding.</p>
+<pre><code data-trim contenteditable class="scala">
+new QueryDSL {
+  this.Query(lift(Coffees)).map { c: Column[T] =>
+    if(c.origin == lift("CH")) {
+      lift("Good")
+    } else
+      c.quality
+  }
+}
+</code></pre>
+				</section>
+<section>
+	<h2>Language Restriction</h2>
+				    <p>Check if the direct embedding complies with the deep embedding in a fine-grained way and report comprehensible error messages.</p>
+<pre><code data-trim contenteditable class="scala">
+new QueryDSL {
+  this.Predef.println(().asInstanceOf[Rep[String]])
+}
+</code></pre>
+				</section>
+				</section>
+				<section>
+				<section>
+				    <img src="usage.png"></img>
+				</section>
 				<section>
 				    <h2>DSL User View</h2>
 				    <pre><code data-trim contenteditable class="scala">
 query {
   Query(Coffees).map(c =>
-    if(c.origin == "Iran")
+    if(c.origin == "CH")
       "Good"
     else
       c.quality
@@ -377,17 +439,13 @@ def _query[T](c: Context)(block: c.Expr[T]): c.Expr[T] =
 				</section>
 
 				<section>
-				    <h2>Yin-Yang: Work Flow</h2>
-				    <img src="workflow.png"></img>
-				</section>
-				<section>
 				  <section>
 				    <h2>Experiment: Slick Front-End</h2>
-				    <p>Existing deep embedding based on Rep types</p>
+				    <img width="660" height="550" src="orion.jpg"> </img>
 				  </section>
 				  <section>
-				    <h2>Slick Queries</h2>
-
+				    <h2>Slick</h2>
+					<p>Compiles functional programs into efficient SQL. Existing deep embedding based on Rep types.</p>
 				  </section>
 				  <section>
 				    <h2>New interface</h2>
@@ -398,7 +456,7 @@ class Query[T] {
   def filter(projection: T => Boolean): Query[T] = ???
   def withFilter(projection: T => Boolean): Query[T] = ???
   def flatMap[S](projection: T => Query[S]): Query[S] = ???
-  ...
+  // ...
   def groupBy[S](f: T => S): Query[(S, Query[T])] = ???
   def innerJoin[S](q2: Query[S]): JoinQuery[T, S] = ???
   def leftJoin[S](q2: Query[S]): JoinQuery[T, S] = ???
@@ -407,181 +465,146 @@ class Query[T] {
 }
 </code></pre>
 				</section>
+				<section>
+				    <h2>Wrapper</h2>
+				    <pre><code data-trim contenteditable class="scala">
+trait QueryOps[T] { self: YYQuery[T] =>
+  def withFilter(p: YYRep[T] => YYRep[Boolean]): YYQuery[T] =
+    filter(p)
+  def flatMap[S](p: YYRep[T] => YYQuery[S]): YYQuery[S] =
+    YYQuery.fromQuery(query flatMap { (x: Rep[T]) =>
+      p(YYValue[T, E](x)).query
+  })
+}
+</code></pre>
+				</section>
 				  <section>
-				  	<h2>Development Effort</h2>
-				    <p>Implementation took 2 months of effort:</p>
+				  	<h2>Implementation</h2>
 				    <ul>
-						<li>400 lines of code</li>
+				    	<li>2 months of development</li>
+						<li>~1000 lines of code</li>
 						<li>50+ tests are passing</li>
 					</ul>
 				  </section>
-				  <!-- TODO make it smoother! -->
-				  <section>
-				    <h2>Performance Improvement</h2>
-				    <img src="slick-performance.png"></img>
-				  </section>
+
 			    </section>
+
+				<section>
+				<section>
+				    <h2>What about constructing a new DSL?</h2>
+				    <img src="repeat.jpeg"></img>
+				</section>
 				<section>
 				    <h2>Deep Embedding Generation</h2>
-				    <p>
-				    </p>
+<pre><code data-trim contenteditable class="scala">
+object BigDecimal {
+  def apply(s: String): BigDecimal =
+    new BigDecimal(new JBigDecimal(s))
+}
+
+class BigDecimal(val v: JBigDecimal) {
+  def +(lhs: BigDecimal): BigDecimal =
+    new BigDecimal(v.add(lhs.v))
+  def *(lhs: BigDecimal): BigDecimal =
+    new BigDecimal(v.multiply(lhs.v))
+}
+</code></pre>
 				</section>
+<section>
+	<h2>Generating an Interface</h2>
+<pre><code data-trim contenteditable class="scala">
+trait BigDecimalOps extends Base with OverloadHack {
+  object BigDecimal {
+    def apply(s: Rep[String]): Rep[BigDecimal] = // ...
+  }
+  implicit class BigDecimalRep(self: Rep[BigDecimal]) {
+    def +(lhs: Rep[BigDecimal]): Rep[BigDecimal] = // ...
+    def *(lhs: Rep[BigDecimal]): Rep[BigDecimal] = // ...
+  }
+}
+</code></pre>
+</section>
+<section>
+<h2>Generate an Intermediate Representation</h2>
+<pre><code data-trim contenteditable class="scala">
+trait BigDecimalExp extends BigDecimalOps with BaseExp {
+  // case classes
+  case class BigDecimalNew
+    (v: Rep[BigDecimal]) extends Def[BigDecimal]
+  case class BigDecimal$plus
+    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]) extends Def[BigDecimal]
+  case class BigDecimal$times
+    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]) extends Def[BigDecimal]
+  case class Apply(s: Rep[String]) extends Def[BigDecimal]
+  // ...
+}
+</code></pre>
+				</section>
+<section>
+<h2>Generate Code Generation</h2>
+<pre><code data-trim contenteditable class="scala">
+override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
+  case BigDecimalNew(v) =>
+    stream.print("val " + quote(sym) + " = new BigDecimal")
+    stream.print("(")
+    stream.print(quote(v))
+    stream.print(")")
+    stream.println("")
+    // ...
+}
+</code></pre>
+
+</section>
+<section>
+	<h2>And Finally</h2>
+	<pre><code data-trim contenteditable class="scala">
+trait BigDecimalExpOpt extends BigDecimalExp {
+  override def bigDecimal$plus
+    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]): Rep[BigDecimal] = {
+    /* please add optimizations here */
+    super.bigDecimal$plus(self, lhs)
+  }
+  override def bigDecimal$times
+    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]): Rep[BigDecimal] = {
+    /* please add optimizations here */
+    super.bigDecimal$times(self, lhs)
+  }
+  // ...
+}
+</code></pre>
+</section>
+</section>
+
 
 				<section>
 					<h2>Demo</h2>
 				</section>
 				<section>
 					<h2>Takeaways</h2>
+					  Easier to program DSLs for both DSL users and DSL authors.
 				</section>
-
+				<section>
+					<h2>Are we there yet?</h2>
+					<ul>
+					  <img src="elon.jpg"></img>
+					</ul>
+				</section>
+                <section>
+					<h2>The team behind Yin-Yang:</h2>
+					<ul>
+						<li>Vojin Jovanovic</li>
+						<li>Sandro Stucki</li>
+						<li>Amir Shaikhha</li>
+						<li>Vladimir Nikolaev</li>
+						<li>Vera Salvisberg</li>
+				    </ul>
+				</section>
 				<section>
 					<h1>THE END</h1>
-					<p>Yin-Yang / http://github.com/vjovanov/yin-yang</p>
+					<p>Yin-Yang&nbsp&nbsp/&nbsp&nbsp<a href="http://github.com/vjovanov/yin-yang">http://github.com/vjovanov/yin-yang</a></p>
 					<p>By &nbsp&nbsp<a href="http://vjovanov.com">Vojin Jovanovic</a>&nbsp&nbsp/&nbsp&nbsp<a href="http://twitter.com/vojjov">@vojjov</a></p>
 				</section>
 
-
-				<section id="transitions">
-					<h2>Transition Styles</h2>
-					<p>
-						You can select from different transitions, like: <br>
-						<a href="?transition=cube#/transitions">Cube</a> -
-						<a href="?transition=page#/transitions">Page</a> -
-						<a href="?transition=concave#/transitions">Concave</a> -
-						<a href="?transition=zoom#/transitions">Zoom</a> -
-						<a href="?transition=linear#/transitions">Linear</a> -
-						<a href="?transition=fade#/transitions">Fade</a> -
-						<a href="?transition=none#/transitions">None</a> -
-						<a href="?#/transitions">Default</a>
-					</p>
-				</section>
-
-				<section id="themes">
-					<h2>Themes</h2>
-					<p>
-						Reveal.js comes with a few themes built in: <br>
-						<a href="?#/themes">Default</a> -
-						<a href="?theme=sky#/themes">Sky</a> -
-						<a href="?theme=beige#/themes">Beige</a> -
-						<a href="?theme=simple#/themes">Simple</a> -
-						<a href="?theme=serif#/themes">Serif</a> -
-						<a href="?theme=night#/themes">Night</a> <br>
-						<a href="?theme=moon#/themes">Moon</a> -
-						<a href="?theme=solarized#/themes">Solarized</a>
-					</p>
-					<p>
-						<small>
-							* Theme demos are loaded after the presentation which leads to flicker. In production you should load your theme in the <code>&lt;head&gt;</code> using a <code>&lt;link&gt;</code>.
-						</small>
-					</p>
-				</section>
-
-				<section>
-					<h2>Global State</h2>
-					<p>
-						Set <code>data-state="something"</code> on a slide and <code>"something"</code>
-						will be added as a class to the document element when the slide is open. This lets you
-						apply broader style changes, like switching the background.
-					</p>
-				</section>
-
-				<section data-state="customevent">
-					<h2>Custom Events</h2>
-					<p>
-						Additionally custom events can be triggered on a per slide basis by binding to the <code>data-state</code> name.
-					</p>
-					<pre><code data-trim contenteditable style="font-size: 18px; margin-top: 20px;">
-Reveal.addEventListener( 'customevent', function() {
-	console.log( '"customevent" has fired' );
-} );
-					</code></pre>
-				</section>
-
-				<section>
-					<section data-background="#007777">
-						<h2>Slide Backgrounds</h2>
-						<p>
-							Set <code>data-background="#007777"</code> on a slide to change the full page background to the given color. All CSS color formats are supported.
-						</p>
-						<a href="#" class="image navigate-down">
-							<img width="178" height="238" src="https://s3.amazonaws.com/hakim-static/reveal-js/arrow.png" alt="Down arrow">
-						</a>
-					</section>
-					<section data-background="https://s3.amazonaws.com/hakim-static/reveal-js/arrow.png">
-						<h2>Image Backgrounds</h2>
-						<pre><code>&lt;section data-background="image.png"&gt;</code></pre>
-					</section>
-					<section data-background="https://s3.amazonaws.com/hakim-static/reveal-js/arrow.png" data-background-repeat="repeat" data-background-size="100px">
-						<h2>Repeated Image Backgrounds</h2>
-						<pre><code style="word-wrap: break-word;">&lt;section data-background="image.png" data-background-repeat="repeat" data-background-size="100px"&gt;</code></pre>
-					</section>
-				</section>
-
-				<section>
-					<h2>Clever Quotes</h2>
-					<p>
-						These guys come in two forms, inline: <q cite="http://searchservervirtualization.techtarget.com/definition/Our-Favorite-Technology-Quotations">
-						&ldquo;The nice thing about standards is that there are so many to choose from&rdquo;</q> and block:
-					</p>
-					<blockquote cite="http://searchservervirtualization.techtarget.com/definition/Our-Favorite-Technology-Quotations">
-						&ldquo;For years there has been a theory that millions of monkeys typing at random on millions of typewriters would
-						reproduce the entire works of Shakespeare. The Internet has proven this theory to be untrue.&rdquo;
-					</blockquote>
-				</section>
-
-				<section>
-					<section id="fragments">
-						<h2>Fragmented Views</h2>
-						<p>Hit the next arrow...</p>
-						<p class="fragment">... to step through ...</p>
-						<ol>
-							<li class="fragment"><code>any type</code></li>
-							<li class="fragment"><em>of view</em></li>
-							<li class="fragment"><strong>fragments</strong></li>
-						</ol>
-
-						<aside class="notes">
-							This slide has fragments which are also stepped through in the notes window.
-						</aside>
-					</section>
-					<section>
-						<h2>Fragment Styles</h2>
-						<p>There's a few styles of fragments, like:</p>
-						<p class="fragment grow">grow</p>
-						<p class="fragment shrink">shrink</p>
-						<p class="fragment roll-in">roll-in</p>
-						<p class="fragment fade-out">fade-out</p>
-						<p class="fragment highlight-red">highlight-red</p>
-						<p class="fragment highlight-green">highlight-green</p>
-						<p class="fragment highlight-blue">highlight-blue</p>
-						<p class="fragment current-visible">current-visible</p>
-						<p class="fragment highlight-current-blue">highlight-current-blue</p>
-					</section>
-				</section>
-
-				<section>
-					<h2>Spectacular image!</h2>
-					<a class="image" href="http://lab.hakim.se/meny/" target="_blank">
-						<img width="320" height="299" src="http://s3.amazonaws.com/hakim-static/portfolio/images/meny.png" alt="Meny">
-					</a>
-				</section>
-
-				<section>
-					<h2>Export to PDF</h2>
-					<p>Presentations can be <a href="https://github.com/hakimel/reveal.js#pdf-export">exported to PDF</a>, below is an example that's been uploaded to SlideShare.</p>
-					<iframe id="slideshare" src="http://www.slideshare.net/slideshow/embed_code/13872948" width="455" height="356" style="margin:0;overflow:hidden;border:1px solid #CCC;border-width:1px 1px 0;margin-bottom:5px" allowfullscreen> </iframe>
-					<script>
-						document.getElementById('slideshare').attributeName = 'allowfullscreen';
-					</script>
-				</section>
-
-				<section>
-					<h2>Take a Moment</h2>
-					<p>
-						Press b or period on your keyboard to enter the 'paused' mode. This mode is helpful when you want to take distracting slides off the screen
-						during a presentation.
-					</p>
-				</section>
 			</div>
 
 		</div>
@@ -624,6 +647,5 @@ Reveal.addEventListener( 'customevent', function() {
 			});
 
 		</script>
-
 	</body>
 </html>
