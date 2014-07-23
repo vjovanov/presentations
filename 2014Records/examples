@@ -6,11 +6,8 @@ List('start_date, 'jobid, 'is_hourly_project, 'hourly_rate_min,
      'budget_max, 'list_job, 'prev_jobid, 'delete_yn)
 
 jobs.filter('jobid) { id: Int => !ignoredJobs(id) }
-    .filter('list_job, 'prev_jobid, 'delete_yn) { sd: (String, String, String) ⇒ 
-      sd._1 == "N" || sd._2 != "None" || sd._3 == "Y" }
-    .filter('start_date) { sd: String => 
-      date(sd) >= periodStartDate && date(sd) < periodEndDate }
-
+    .filter('list_job, 'prev_jobid, 'delete_yn) { (lj: String, jobId: String, dyb: String) ⇒
+      lj == "N" || jobId != "None" || dyb == "Y"
 
     .map(('is_hourly_project, 'hourly_rate_min, 'hourly_rate_max, 'hourly_rate_code, 'project_budget, 'budget_min, 'budget_max) ->
       ('budget, 'isHourly, 'hourlyRate)) {
@@ -93,7 +90,8 @@ Implementation:
   - Only the public API of macros
   - Cross Compile  
   - 54 test cases 
-  - specialized access to fields 
+  - Specialized access to fields 
+  - 469 LOC with macro compat  
 
 Limitations: 
   - You never write Rec types explicitly
@@ -114,5 +112,13 @@ Conclusion:
    val (cServiceDesc, cSkills) =
     (bid.service_descr, skillNames(bid.job_skills))
   
-
+Future work: 
+  - Introduce CRUD operations on recrods based on experience
+  - Define records in terms of the core Scala calculus
+    - LUBs
+  - Find nice syntax for it:
+    (name = "Hannah", age = "30")
+    ("Hannah", age = "30")
+    ("Hannah", "30")
+ 
 ???
