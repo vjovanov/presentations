@@ -1,0 +1,118 @@
+Motivation: 
+
+// Schema
+List('start_date, 'jobid, 'is_hourly_project, 'hourly_rate_min, 
+     'hourly_rate_max, 'hourly_rate_code, 'project_budget, 'budget_min,
+     'budget_max, 'list_job, 'prev_jobid, 'delete_yn)
+
+jobs.filter('jobid) { id: Int => !ignoredJobs(id) }
+    .filter('list_job, 'prev_jobid, 'delete_yn) { sd: (String, String, String) ⇒ 
+      sd._1 == "N" || sd._2 != "None" || sd._3 == "Y" }
+    .filter('start_date) { sd: String => 
+      date(sd) >= periodStartDate && date(sd) < periodEndDate }
+
+
+    .map(('is_hourly_project, 'hourly_rate_min, 'hourly_rate_max, 'hourly_rate_code, 'project_budget, 'budget_min, 'budget_max) ->
+      ('budget, 'isHourly, 'hourlyRate)) {
+        (is_hourly_project: String, hourly_rate_min: String, hourly_rate_max_str: String, hourly_rate_code_str: String, project_budget: String, budget_min: String, budget_max_str: String) =>
+    ...
+
+gb.mapStream(
+      ('jobid, 'start_date, 'job_skills, 'seller_skills,
+       'catid, 'subcategory_id,'awarded_timestamp, 'amount_usd,
+       'name, 'description, 'job_tag_string, 'service_descr) ->
+      ('jobid1, 'start_date1, 'JsIntCsOvJsUCs, 'JsIntCsOvJs,
+       'JeIntCeOvJeUCe, 'Csp_xdIntJeOvCsp_xdUJe, 'Csp_xdIntJsOvJs,
+       'vZ1dotvZ4, 'Csp_xddotJe, 'NormvZ1dotvZ4, 'NormCsp_xddotJe,
+       'avg_amount, 'vCdotvJ, 'NormvCdotvJ)) {
+        it: Iterator[(Int, String, String, String, String, String,
+                      String, Double, String, String, String, String)] =>
+   ...
+   // Numerical features
+   val (je, ce) = 
+     (extendedSkills(bid._4), extendedSkills(bid._3))
+
+   // Base text features
+   val (jTitle, jDescr, jSkills, jTag) = 
+     (bid._9, bid._10, skillNames(bid._3), bid._11)
+   
+   val (cServiceDesc, cSkills) = 
+    (bid._12, skillNames(bid._4))
+
+Goals: 
+
+ - Find a solution where:
+  - Access fields with a path
+  - Auto completion works
+  - Errors are comprehensible
+
+ - Release the library in the wild to see what people need
+ - Based on experience find a cleaner solution 
+ - If it catches on integrate in future versions of Scala
+
+What we did: 
+ 
+ Introduce a `Rec` type as a super type of all records
+ Records are structural refinements of Rec
+ Each field is a def macro so structurla types are never used in expressions
+
+Demo 
+
+val person = Rec("name" -> "Hannah", "age" -> 30)
+if (person.age > 18) println(s"${person.name} is an adult.")
+
+val person = Rec(
+ "name" -> "Hannah",
+ "age" -> 30,
+ "country" -> Rec("name" -> "US", "state" -> "CA"))
+
+case class Country(name: String, state: String)
+case class Person(name: String, age: String, country: Country)
+val personClass = person.to[Person]
+
+import records.RecordConversions._
+val personClass: Person = person
+
+person.nme
+
+val person = Rec("name" -> "Hannah", "age" -> 30)
+person.to[Person]
+
+Type Errors:
+shapeless.::[Int with shapeless.record.KeyTag[String("f1"),Int],shapeless.::[Int with shapeless.record.KeyTag[String("f2"),Int],shapeless.::[Int with shapeless.record.KeyTag[String("f3"),Int],shapeless.::[Int with shapeless.record.KeyTag[String("f4"),Int],shapeless.::[Int with shapeless.record.KeyTag[String("f5"),Int],shapeless.HNil]]]]]
+
+scala> x.get("f6")
+<console>:18: error: No field String("f6") in record shapeless.::[Int with shapeless.record.KeyTag[String("f1"),Int],shapeless.::[Int with shapeless.record.KeyTag[String("f2"),Int],shapeless.::[Int with shapeless.record.KeyTag[String("f3"),Int],shapeless.::[Int with shapeless.record.KeyTag[String("f4"),Int],shapeless.::[Int with shapeless.record.KeyTag[String("f5"),Int],shapeless.HNil]]]]]
+              x.get("f6")
+                   ^
+Compile Times:
+
+Access Times:
+
+Implementation:
+  - Only the public API of macros
+  - Cross Compile  
+  - 54 test cases 
+  - specialized access to fields 
+
+Limitations: 
+  - You never write Rec types explicitly
+  - 2.10.x LUBs behave differently
+  - IDE displays errors from discarded implict macros
+  - IntelliJ is not so nice
+
+Conclusion: 
+  gb.mapStream { bids =>
+    ...
+    val (je, ce) =
+      (extSkills(bid.seller_skills), extSkills(bid.job_skills))
+    
+    // Base text features
+   val (jTitle, jDescr, jSkills, jTag) = 
+     (bid.name, bid.description, skillNames(bid.seller_skills), bid.job_tag_string)
+
+   val (cServiceDesc, cSkills) =
+    (bid.service_descr, skillNames(bid.job_skills))
+  
+
+???
