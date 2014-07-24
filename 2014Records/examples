@@ -45,7 +45,6 @@ Goals:
 
  - Release the library in the wild to see what people need
  - Based on experience find a cleaner solution 
- - If it catches on integrate in future versions of Scala
 
 What we did: 
  
@@ -55,13 +54,13 @@ What we did:
 
 Demo 
 
-val person = Rec("name" -> "Hannah", "age" -> 30)
+val person = Rec(name = "Hannah", age = 30)
 if (person.age > 18) println(s"${person.name} is an adult.")
 
 val person = Rec(
- "name" -> "Hannah",
- "age" -> 30,
- "country" -> Rec("name" -> "US", "state" -> "CA"))
+ name = "Hannah",
+ age = 30,
+ country = Rec(name -> "US", state = "CA"))
 
 case class Country(name: String, state: String)
 case class Person(name: String, age: String, country: Country)
@@ -72,7 +71,7 @@ val personClass: Person = person
 
 person.nme
 
-val person = Rec("name" -> "Hannah", "age" -> 30)
+val person = Rec(name = "Hannah", age = 30)
 person.to[Person]
 
 Type Errors:
@@ -113,12 +112,13 @@ Conclusion:
     (bid.service_descr, skillNames(bid.job_skills))
   
 Future work: 
-  - Introduce CRUD operations on recrods based on experience
+  - Introduce CUD operations on recrods
   - Define records in terms of the core Scala calculus
-    - LUBs
-  - Find nice syntax for it:
+    - Can we support proper LUBs
+  - Find nice syntax for them
     (name = "Hannah", age = "30")
     ("Hannah", age = "30")
     ("Hannah", "30")
+  - Explore further possibilities (method parameter lists, method overloading) 
  
 ???
