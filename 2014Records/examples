@@ -60,7 +60,7 @@ if (person.age > 18) println(s"${person.name} is an adult.")
 val person = Rec(
  name = "Hannah",
  age = 30,
- country = Rec(name -> "US", state = "CA"))
+ country = Rec(name -> "US", state = "CA")) // state in the country did not make sense in the presentation
 
 case class Country(name: String, state: String)
 case class Person(name: String, age: String, country: Country)
@@ -74,6 +74,8 @@ person.nme
 val person = Rec(name = "Hannah", age = 30)
 person.to[Person]
 
+// todo here it is good to show that nested fields are also shown nicely
+
 Type Errors:
 shapeless.::[Int with shapeless.record.KeyTag[String("f1"),Int],shapeless.::[Int with shapeless.record.KeyTag[String("f2"),Int],shapeless.::[Int with shapeless.record.KeyTag[String("f3"),Int],shapeless.::[Int with shapeless.record.KeyTag[String("f4"),Int],shapeless.::[Int with shapeless.record.KeyTag[String("f5"),Int],shapeless.HNil]]]]]
 
@@ -86,7 +88,7 @@ Compile Times:
 Access Times:
 
 Implementation:
-  - Only the public API of macros
+  - Only the public API of macros (except in one spot)
   - Cross Compile  
   - 54 test cases 
   - Specialized access to fields 
