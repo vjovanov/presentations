@@ -164,10 +164,18 @@ body {
 }
 
 /*9D60FF - purple*/
-/*#E0D75A - yellow*/
+/*E0D75A - yellow*/
 /*EC005A - pink*/
 /*96E309 - green*/
 /*13daec - blue*/
 .last-emph {
   color: #96E309;
+}
+
+/*********************************************
+* Code
+**********************************************/
+
+pre .string {
+ color:#E0D75A;
 }

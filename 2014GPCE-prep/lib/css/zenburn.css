@@ -20,7 +20,8 @@ pre .nginx .title,
 pre .request,
 pre .status,
 pre .clojure .attribute {
-  color: #E3CEAB;
+  /*color: #E3CEAB;*/
+  color:#EC005A;
 }
 
 pre .django .template_tag,
@@ -90,7 +91,8 @@ pre .attr_selector,
 pre .pseudo,
 pre .apache .cbracket,
 pre .tex .formula {
-  color: #CC9393;
+  /*color: #CC9393;*/
+  color: #E0D75A;
 }
 
 pre .shebang,
