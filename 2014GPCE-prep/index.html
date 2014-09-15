@@ -14,7 +14,7 @@
 
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/reveal.min.css">
 		<link rel="stylesheet" href="css/theme/default.css" id="theme">
 		<link rel="stylesheet" href="css/custom.css">
 		<!-- <link rel="stylesheet" href="css/print/pdf.css"> -->
@@ -51,9 +51,9 @@
 					<h1>Yin-Yang</h1>
 					<h3>Concealing the Deep Embedding of DSLs</h3>
 					<p>
-						<a href="">Vojin Jovanovic</a>&nbsp;&nbsp;&nbsp; <a href="">Amir Shaikhha</a>&nbsp;&nbsp;&nbsp; <a href="">Sandro Stucki</a>&nbsp;&nbsp;&nbsp;</p><p><a href="">Vladimir Nikolaev</a>&nbsp;&nbsp;&nbsp;  <a href="">Christoph Koch</a>&nbsp;&nbsp;&nbsp; <a href="">Martin Odersky</a>
+						<a href="http://vjovanov.com"><u>Vojin Jovanovi&#263;</u></a>&nbsp;&nbsp;&nbsp; <a href="http://people.epfl.ch/amir.shaikhha">Amir Shaikhha</a>&nbsp;&nbsp;&nbsp; <a href="http://people.epfl.ch/sandro.stucki">Sandro Stucki</a>&nbsp;&nbsp;&nbsp;</p><p><a href="http://vladimirnik.github.io/">Vladimir Nikolaev</a>&nbsp;&nbsp;&nbsp;  <a href="http://people.epfl.ch/christoph.koch">Christoph Koch</a>&nbsp;&nbsp;&nbsp; <a href="http://lampwww.epfl.ch/~odersky/">Martin Odersky</a>
 					</p>
-                    <div><img style="background: rgba(255, 255, 255, 0.00);border: 0px solid #eeeeee;box-shadow: 0 0 0px rgba(0, 0, 0, 0.15);" src="./logo.png"></img></div>
+                    <div><img width="75%" style="background: rgba(255, 255, 255, 0.00);border: 0px solid #eeeeee;box-shadow: 0 0 0px rgba(0, 0, 0, 0.15);" src="./logo.png"></img></div>
 				</section>
 <!-- External DSLs
 				<section>
@@ -98,40 +98,62 @@ WHERE  m.username = g.username
 				  </section>
 				</section>
 -->
-<!-- TODO Make a twist to explain what do we need to translate the language. -->
-<!-- TODO Generation -->
-<!-- TODO Links -->
-<!-- TODO Intrinsic Constructs / clarify -->
-<!-- TODO Introduce footnotes and position images -->
-<!-- TODO Position image lower left or upper left. -->
-<!-- TODO Dodati c na prezime. -->
-<!-- TODO Code highlighting. -->
-<!-- TODO How does the type error occur? -->
-<!-- TODO Eugenes comments! -->
-<!-- TODO Statically typed language. Scala. -->
-<!-- TODO Tables -->
+<!-- TODO Generation. -->
+<!-- TODO Analysis. -->
+<!-- TODO Intrinsic Constructs / Clarify -->
+<!-- TODO Introduce references. -->
+<!-- TODO How do the type errors occur? -->
+<!-- TODO fix the formulas! -->
+<!-- TODO Check the projector resolution! -->
+
 <!-- After the Dry Run -->
+<!-- TODO Statically typed language. Scala. -->
 <!-- TODO Do we need to explain macros?  -->
+<!-- TODO Check the resolution!!! -->
+<!--
+    "easy to learn and use". arguable.
+    bigger font?
+    line numbers are effectively invisible
+    scala collections is a dsl?
+    low performance, but what about inlining or blitz?
+    are macros deep embedding? if yes, then the argumentation about deep embedding needs to be adjusted or made less general
+    Query(Coffees) => where did this DSL come from?
+    "user friendliness only matters during development" stack traces?
+    explanation of virtualization is incomplete
+    "if => __if" explanation is incomplete
+    why can't we override methods on AnyRef?
+    "Translation steps" need to demarcate steps: 1, 2, 3, etc
+    highlighting glitch: lift("CH"***)*** <-- wrong highlight
+    you mention scala-virtualized, but you're not actually using it?
+    language restriction: is this a TRANSLATION step?
+    ().asInstanceOf[Rep[String]]. wat?
+    maybe the presentation would benefit from more explicit structure?
+    maybe use typeOf[slick.Query] or even classOf[slick.Query] instead of "slick.Query"
+    queryScan: unit(unit())
+    compare dsl generation with forge (what's forge?)
+    do lines of code include empty lines, comments, etc?
+    if you compare with forge using detailed terminology, what about introducing forge, so that people know what you're talking about?
+    what's slick?
+    auto-completion for scan during the eclipse demo?
+    ._3, ._4, etc look a bit weird
+    "by using reflection". not scared to say that before an academic audience? -->
 
 		<section>
 			<section>
 				<h2>Embedded Domain-Specific Languages</h2>
-				<p>Embed (implement) a domain-specific language as a <font class="emph1">library</font> in a general purpose <font class="emph2">host language</font>.</p>
+				<p>Domain-specific language <font class="emph1">embedded</font> as a <font class="emph1">library</font> in a general purpose <font class="emph2">host language</font>.</p>
 			</section>
 			<section>
 			  <h2>Shallow Embedding</h2>
-			  <p><font class="subj-emph">Values</font> in the embedded language <font class="verb-emph">directly</font> represent <font class="obj-emph">values in the host language</font>.</p>
+			  <p><font class="emph1">Values</font> in the embedded language <font class="emph2">directly represent</font> values in the host language.</p>
               </section>
             <section>
               <h2>Direct Embedding</h2>
-              <p><font class="subj-emph">Shallow embedding</font> that uses <font class="verb-emph">intrinsic constructs</font> of the <font class="obj-emph">host language</font>.</p>
-              <!-- TODO Do I need to clarify? -->
-              <!-- TODO fix the formulas! -->
-              <!-- TODO Check the projector resolution! -->
+              <p>Shallow embedding that uses <font class="emph1">intrinsic constructs</font> of the <font class="emph2">host language</font>.</p>
 			</section>
 			<section>
-			  <h2>Direct Embedding - <font class="verb-emph">Low Performance</font></h2>
-			  <p>Large abstraction overhead. Example the Scala collections:</p>
+			  <h2>Direct Embedding - <font class="emph1">Low Performance</font></h2>
+			  <p align="left">Due to an <font class="emph1">abstraction overhead</font>. For example, the Scala collections:</p>
 		     <pre><code data-trim contenteditable class="scala">
 val v1 = Seq(1,2,3)
 val v2 = Seq(4,5,6)
@@ -141,33 +163,37 @@ val (min, max) = (sum.min, sum.max)
 					</section>
 					<section>
 						<h2>Deep Embedding</h2>
-						<p>Values in the embedded language are <font class="verb-emph">symbolically represented</font> by the values in the host language.</p>
+						<p><font class="emph1">Values</font> in the embedded language are <font class="emph2">symbolically represented</font> by the values in the host language.</p>
 						<p>&nbsp;</p>
 						<pre><code data-trim contenteditable class="scala">
-// symbolic representation
-trait Rep[T]
-case class Const(v: Int) extends Rep[Int]
-case class Minus(l: Rep[Int], r: Rep[Int]) extends Rep[Int]
-// implicit lifting
-implicit def lift(i: Int): Rep[Int] = Const(i)
-implicit class IntOps(l: Rep[Int]) {
-  def -(r: Rep[Int]): Rep[Int] = Minus(l, r)
+trait DSL {
+  // symbolic representation
+  trait Rep[+T]
+  case class Const(v: Int) extends Rep[Int]
+  case class Minus(l: Rep[Int], r: Rep[Int]) extends Rep[Int]
+  // implicit lifting
+  implicit def lift(i: Int): Rep[Int] = Const(i)
+  implicit class IntOps(l: Rep[Int]) {
+    def -(r: Rep[Int]): Rep[Int] = Minus(l, r)
+  }
 }
-
-val y: Rep[Int] = 1024
-val x: Rep[Int] = y - 1
-println(x)
+new DSL {
+  val y: Rep[Int] = 1024
+  val x: Rep[Int] = y - 1
+  println(x)
+}
 </code></pre>
 					</section>
 					<section>
 				  	  <h2>Deep Embedding - <font class="verb-emph">Troubles Debugging</font></h2>
-                      <!-- TODO needs to be somehow connected. -->
 				  	  <img src="debug11.png"></img>
+                      <p align="left">Stepping through shows the intermediate representation:</p>
 				  	  <img src="debug2.png"></img>
 				    </section>
 				    <section>
 
 				  	  <h2>Deep Embedding - <font class="verb-emph">Cryptic Type Errors</font></h2>
+<p align="left">Seemingly correct program:</p>
 <pre><code data-trim contenteditable class="scala">
 Query(Coffees).map(c =>
   if(c.origin == "CH")
@@ -176,15 +202,14 @@ Query(Coffees).map(c =>
     c.quality
 )
 </code></pre>
-<ul>
-	<li>Don’t know how to unpack Any to T and pack to G</li>
-	<li>Not enough arguments for method map: (implicit shape: scala.ql.lifted.Shape[Any,T,G]):scala.slick.lifted.Query[G,T]</li>
-</ul>
+<p align="left">Yields complicated type errors:</p>
+<pre><code data-trim class="scala">
+&lt;error&gt; Don’t know how to unpack Any to T and pack to G
+&lt;error&gt; Not enough arguments in method
+map: (implicit shape: scala.ql.lifted.Shape[Any,T,G])
+:scala.slick.lifted.Query[G,T]
+</code></pre>
 
-
-
-
-</p>
 				     </section>
 <section>
 
@@ -203,84 +228,57 @@ Query(Coffees).map(c =>
 
 				<section>
 				<section>
-                    <h2>Direct Embedding vs. Deep Embedding</h2>
+                    <h2>Direct Embedding vs Deep Embedding</h2>
 				  	<table class="reveal" >
 				  		<thead>
 				  			<tr><th></th><th>Deep</th><th>Direct</th></tr>
 				  		</thead>
 				  	  <tbody>
-				  	  	<tr><td>Friendly</td><td align="center"><font color="red">X</font></td><td><font color="green">✓</font></td></tr>
-				  	  	<tr><td>Fast</td><td align="center"><font color="green">✓</font></td><td><font color="red">X</font></td></tr>
+				  	  	<tr><td>User Friendly</td><td align="center"><font color="red">X</font></td><td><font color="#96E309">✓</font></td></tr>
+				  	  	<tr><td>Fast</td><td align="center"><font color="#96E309">✓</font></td><td><font color="red">X</font></td></tr>
 				  		</tbody>
 					</table>
 				</section>
 				<section>
 					<h2>Insight</h2>
-                    <p>User friendliness matters during program development.</p>
-                    <p>Performance matters in production.</p>
+                    <p><font class="emph1">User friendliness</font> matters during <font class="emph1">program development</font>.</p>
+                    <p><font class="emph1">Performance</font> matters in <font class="emph1">production</font>.</p>
 				</section>
 				<section>
-                    <p>Automatically <font class="verb-emph">translate</font> a <font class="subj-emph">friendly direct embedding</font> to a <font class="obj-emph">fast deep embedding</font> before deployment!</p>
+                    <p>Automatically <font class="emph1">translate</font> a <font class="emph2">friendly direct embedding</font> to a <font class="emph2">fast deep embedding</font> before deployment!</p>
+                    <img src="yinyang-transparent.png" style="background: rgba(255, 255, 255, 0.00);border: 0px solid #eeeeee;box-shadow: 0 0 0px rgba(0, 0, 0, 0.15);" width="25%"/>
 				</section>
 			   </section>
 
-				<section>
-				<section>
-                    <!-- Translation TODO What do you want to say -->
-                    <!-- Do we want to translate them. -->
-				  <h2>Translation</h2>
-				  <table class="reveal" >
-				  		<thead>
-				  			<tr><th>Direct</th><th>Deep</th></tr>
-				  		</thead>
-				  	  <tbody>
-				  	  	<tr><td><pre><code data-trim contenteditable class="scala">
-{
-  Query(Coffees).map(c =>
-    if(c.origin == "CH")
-      "Good"
-    else
-      c.quality
-  )
-}
-					</code></pre>
-				  	  	</td><td><pre><code data-trim contenteditable class="scala">
-query { // scala-virtualized
-  Query(Coffees).map(c =>
-    if(c.origin == "CH")
-      "Good"
-    else
-      c.quality
-  )
-}
-					</code></pre></td></tr>
-				  		</tbody>
-					</table>
-
-				  </p>
-				</section>
-				</section>
+                <section>
+                  <h2>Translation</h2>
+                  <p align="left">Use <font class="emph1">Scala Macros</font> to achieve:</p>
+                  <ul>
+                  <li><font class="emph1">Language Virtualization</font> - host language intrinsics do not correspond to DSL types.</li>
+                  <li><font class="emph1">DSL Intrinsification</font> - operations, constants, and types in the direct embedding do not correspond to the deep embedding.</li>
+                  </ul>
+                </section>
 				<section>
 				  <section>
-				    <h2>Translation: Language Virtualization</h2>
+				    <h2>Translation: <font class="emph1">Language Virtualization</font></h2>
 				    <table class="reveal" >
 				  		<thead>
 				  			<tr><th></th><th>Direct</th><th>Deep</th></tr>
 				  		</thead>
 				  	  <tbody>
 				  	  	<tr>
-				  	  		<td>Language Constructs</td>
+				  	  		<td>Language Constructs &nbsp;&nbsp; <font size="5">Rompf et al. [HOSC 13']</font></td>
 				  	  		<td></td>
 				  	  		<td></td>
 				  	  	</tr>
 				  	  	<tr>
 				  	  		<td></td>
-				  	  		<td>if(c) t else e</td>
+				  	  		<td><font class="pink">if</font>(c) t else e</td>
 				  	  		<td>__if(c, t, e)</td>
 				  	  	</tr>
 				  	  	<tr>
 				  	  		<td></td>
-				  	  		<td>while(c) b</td>
+				  	  		<td><font class="pink">while</font>(c) b</td>
 				  	  		<td>__while(c, b)</td>
 				  	  	</tr>
 				  	  	<tr>
@@ -304,11 +302,11 @@ query { // scala-virtualized
 			    </section>
 				<section>
 				  <section>
-				    <h2>Translation: DSL Intrinsification</h2>
+				    <h2>Translation: <font class="emph1">DSL Intrinsification</font></h2>
 				    <p>Converts DSL intrinsics from the direct embedding into their deep counterparts.</p>
 				  </section>
 				  <section>
-				    <h2>Translation: Operations</h2>
+				    <h2>Translation: <font class="emph1">Operations</font></h2>
                     <ul>
 						<li>Injects the whole program into the DSL component</li>
 						<li>Replaces prefixes with <code>this</code></li>
@@ -342,7 +340,7 @@ new QueryDSL {
 					</table>
 				  </section>
 				  <section>
-				    <h2>Translation: Constants and Captured Variables</h2>
+				    <h2>Translation: <font class="emph1">Constants and Captured Variables</font></h2>
 </code></pre>
 <pre><code data-trim contenteditable class="scala">
 	def lift[T, Ret](v: T)
@@ -361,21 +359,24 @@ new QueryDSL {
 </code></pre>
 				  </section>
 				  <section>
-				    <h2>Type Translation: Generic Embedding</h2>
+				    <h2>Type Translation: <font class="emph1">Generic Embedding</font></h2>
+                    <p align="left">Function \(\tau_{\mathtt{arg}}\) applied for type arguments, \(\tau\) otherwise:</p>
 				    <p>
 				       \[\begin{aligned}
-				       &\tau(T, \mathtt{targ}) & = & \; T \\
-					   &\tau(T, \mathtt{other}) & = & \; Rep [ T ]
-                         \end{aligned}\]
+                       \newcommand{\ttname}{\tau}
+                       \newcommand{\ttarg}[1][]{\ttname_{\mathtt{arg}}(#1)}
+                       \newcommand{\ttother}[1][]{\ttname (#1)}
+				       &\ttarg[T] & \; = \; &  T \\
+					   &\ttother[T] & \; = \; & \; Rep [ T ]
+                       \end{aligned}\]
 				    </p>
 				  </section>
 				  <section>
-				    <h2>Type Translation: Eager Inlining</h2>
+				    <h2>Type Translation: <font class="emph1">Eager Inlining</font></h2>
+                    <p align="left">Function \(\tau_{\mathtt{arg}}\) applied for type arguments, \(\tau\) otherwise:</p>
 				    <p>
                          \[\begin{aligned}
                          \newcommand{\ttname}{\tau}
-
-% Type translations (Sandro-style).
 \newcommand{\ttarg}[1][]{\ttname_{\mathtt{arg}}(#1)}
 \newcommand{\ttother}[1][]{\ttname (#1)}
                          &\ttarg[T\lbrack I_1,\ldots,I_n \rbrack]   & \; = \; & T[\ttarg[I_1],\ldots,\ttarg[I_n]] \\
@@ -389,15 +390,47 @@ new QueryDSL {
 				    </p>
 				  </section>
 				</section>
+                <section>
+                  <h2>Translation in Practice</h2>
+                  <table class="reveal" >
+                        <thead>
+                            <tr><th>Direct</th><th>Deep</th></tr>
+                        </thead>
+                      <tbody>
+                        <tr><td><pre><code data-trim contenteditable class="scala">
+{
+  Query(Coffees).map(c =>
+    if(c.origin == "CH")
+      "Good"
+    else
+      c.quality
+  )
+}
+                    </code></pre>
+                        </td><td><pre><code data-trim contenteditable class="scala">
+{
+  Query(Coffees).map(c =>
+    if(c.origin == "CH")
+      "Good"
+    else
+      c.quality
+  )
+}
+                    </code></pre></td></tr>
+                        </tbody>
+                    </table>
+
+                  </p>
+                </section>
 				<section>
-				<section>
+                <section>
 				    <h2>Language Restriction</h2>
 				    <p>Direct embedding API can be richer than the deep embedding.</p>
 <pre><code data-trim contenteditable class="scala">
 new QueryDSL {
   this.Query(lift(Coffees)).map { c: Rep[T] =>
     if(c.origin == lift("CH")) {
-      println("Due to good import quality!")
+      println("Due to Nestle's good import policies!")
       lift("Good")
     } else
       c.quality
@@ -405,21 +438,24 @@ new QueryDSL {
 }
 </code></pre>
 				</section>
+
 <section>
-	<h2>Language Restriction:  Analysis</h2>
-				    <p>Check if the direct embedding complies with the deep embedding in a fine-grained way and report comprehensible error messages.</p>
-<pre><code data-trim contenteditable class="scala">
+	<h2>Language Restriction:  <font class="emph1">Analysis</font></h2>
+
+				    <p>Analise weather operations in the direct embedding would compile with the deep embedding in a fine-grained way and report comprehensible error messages.</p>
+<!-- <pre><code data-trim contenteditable class="scala">
 new QueryDSL {
   this.Predef.println(().asInstanceOf[Rep[String]])
 }
-</code></pre>
+</code></pre> -->
 <pre><code data-trim contenteditable class="bash">
-error: Predef.println() is not supported by the DSL.
+&lt;error&gt; Predef.println() is not supported by the DSL.
 println("Due to good import quality!")
 ^
 </code></pre>
 				</section>
 				</section>
+
 				<!-- Usage section
 <section>
 				<section>
@@ -456,9 +492,35 @@ def _query[T](c: Context)(block: c.Expr[T]): c.Expr[T] =
 				</section>-->
 
 				<section>
-				<section>
+                <section>
 				    <h2>What about constructing a new DSL?</h2>
 				    <img src="repeat.jpeg"></img>
+                </section>
+                <section>
+                    <h2>Deep Embedding Generation</h2>
+                    <p>Generate a deep embedding based on the direct embedding.</p>
+                </section>
+
+                <section>
+                    <p align="left">Foreach operation:</p>
+                    <p align="left">Generate:</p>
+<pre><code data-trim contenteditable class="scala">
+def queryScan[T: Manifest]
+  (self : Rep[Query[T]], pred : ((Rep[T]) => Rep[Boolean])): Rep[Query[T]] =
+  QueryScan[T](self, pred)
+    .atPhase(lowering) { // lowering Rompf et al. [POPL 13']
+    // translated body of scan
+    val builder: this.Rep[ArrayBuffer[T]] = ArrayBuffer.apply();
+    lowering(self).table.foreach{((value: this.Rep[T]) =>
+       __ifThenElse(
+         pred.apply(value),
+         builder.+=(value),
+        unit(())))
+    };
+    Query.apply(builder)
+  }
+</code></pre>
+                </section>
 				</section>
 <!-- Complete Generation
 				<section>
