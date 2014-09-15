@@ -141,7 +141,7 @@ WHERE  m.username = g.username
 		<section>
 			<section>
 				<h2>Embedded Domain-Specific Languages</h2>
-				<p>Domain-specific language <font class="emph1">embedded</font> as a <font class="emph1">library</font> in a general purpose <font class="emph2">host language</font>.</p>
+				<p>Domain-specific language <font class="emph1">embedded</font> in a general purpose <font class="emph2">host language</font>.</p>
 			</section>
 			<section>
 			  <h2>Shallow Embedding</h2>
@@ -153,7 +153,7 @@ WHERE  m.username = g.username
 			</section>
 			<section>
 			  <h2>Direct Embedding - <font class="emph1">Low Performance</font></h2>
-			  <p align="left">Due to an <font class="emph1">abstraction overhead</font>. For example, the Scala collections:</p>
+			  <p align="left">Due to <font class="emph1">abstraction overhead</font>. For example, the Scala collections:</p>
 		     <pre><code data-trim contenteditable class="scala">
 val v1 = Seq(1,2,3)
 val v2 = Seq(4,5,6)
@@ -203,12 +203,12 @@ Query(Coffees).map(c =>
 )
 </code></pre>
 <p align="left">Yields complicated type errors:</p>
-<pre><code data-trim class="scala">
-&lt;error&gt; Don’t know how to unpack Any to T and pack to G
-&lt;error&gt; Not enough arguments in method
-map: (implicit shape: scala.ql.lifted.Shape[Any,T,G])
-:scala.slick.lifted.Query[G,T]
-</code></pre>
+<pre>
+<font class="emph1">&lt;error&gt;</font> Don’t know how to unpack Any to T and pack to G
+<font class="emph1">&lt;error&gt;</font> Not enough arguments in method
+<code data-trim contenteditable class="scala">map: (implicit shape: scala.ql.lifted.Shape[Any,T,G])
+:scala.slick.lifted.Query[G,T]</code>
+</pre>
 
 				     </section>
 <section>
@@ -267,7 +267,7 @@ Query(Coffees).map(c =>
 				  		</thead>
 				  	  <tbody>
 				  	  	<tr>
-				  	  		<td>Language Constructs &nbsp;&nbsp; <font size="5">Rompf et al. [HOSC 13']</font></td>
+				  	  		<td>Language Constructs<br/><font size="5">Rompf et al. [HOSC 13']</font></td>
 				  	  		<td></td>
 				  	  		<td></td>
 				  	  	</tr>
@@ -306,7 +306,7 @@ Query(Coffees).map(c =>
 				    <p>Converts DSL intrinsics from the direct embedding into their deep counterparts.</p>
 				  </section>
 				  <section>
-				    <h2>Translation: <font class="emph1">Operations</font></h2>
+				    <h2>Translation: <font class="emph1">Terms</font></h2>
                     <ul>
 						<li>Injects the whole program into the DSL component</li>
 						<li>Replaces prefixes with <code>this</code></li>
@@ -327,12 +327,11 @@ query {
 }
 					</code></pre>
 				  	  	</td><td><pre><code data-trim contenteditable class="scala">
-new QueryDSL {
-  this.Query(Coffees).map(c =>
-    if(c.origin == "CH")
-      "Good"
-    else
-      c.quality
+{
+  Query(Coffees).map(c =>
+    __if(infix_==(c.origin,"CH"),
+     , "Good"
+     , c.quality)
   )
 }
 					</code></pre></td></tr>
@@ -503,21 +502,17 @@ def _query[T](c: Context)(block: c.Expr[T]): c.Expr[T] =
 
                 <section>
                     <p align="left">Foreach operation:</p>
+<pre><code data-trim contenteditable class="scala">
+def scan(pred: T => Boolean): Query[T] = &lt;scan-body&gt;
+</code></pre>
                     <p align="left">Generate:</p>
 <pre><code data-trim contenteditable class="scala">
-def queryScan[T: Manifest]
+def scan[T: Manifest] // Deep Embedding Interface
   (self : Rep[Query[T]], pred : ((Rep[T]) => Rep[Boolean])): Rep[Query[T]] =
-  QueryScan[T](self, pred)
-    .atPhase(lowering) { // lowering Rompf et al. [POPL 13']
-    // translated body of scan
-    val builder: this.Rep[ArrayBuffer[T]] = ArrayBuffer.apply();
-    lowering(self).table.foreach{((value: this.Rep[T]) =>
-       __ifThenElse(
-         pred.apply(value),
-         builder.+=(value),
-        unit(())))
-    };
-    Query.apply(builder)
+  QueryScan[T](self, pred) // IR Node (symbolic representation)
+    .atPhase(lowering) {
+    // lowering Rompf et al. [POPL 13'] (translated body of scan)
+    &lt;prettyPrint(yinYangTranslation(scan-body))&gt;
   }
 </code></pre>
                 </section>
@@ -608,6 +603,9 @@ trait QueryTransformer extends ForwardTransformer {
 -->
 </section>
 <section>
+  <h2>Demo</h2>
+</section>
+<section>
                   <section>
                     <h2>Evaluation</h2>
                     <ul>
@@ -632,21 +630,19 @@ trait QueryTransformer extends ForwardTransformer {
                   <section>
                     <h2>Adopting Yin-Yang for Slick</h2>
                     <ul>
-                        <li>2 months of development</li>
-                        <li>~1000 lines of code</li>
-                        <li>50+ tests that cover the core functionality</li>
+                        <li><font class="emph1">2 months</font> of development</li>
+                        <li><font class="emph1">~1000 lines</font> of code</li>
+                        <li><font class="emph1">50+ tests</font> that cover the core functionality</li>
                     </ul>
                   </section>
 
                 </section>
 
 				<section>
-					<h2>Demo</h2>
-				</section>
-				<section>
 					<h2>Yin-Yang</h2>
-                    <p>Conceals the deep embedding by using reflection to translate the direct embedding to the deep embedding.</p>
-					<p>Easier to program DSLs for both DSL users and DSL authors.</p>
+                    <p><font class="emph1">Conceals the deep embedding</font> by using reflection to <font class="emph1">translate</font> the <font class="emph1">direct embedding</font> to the <font class="emph1">deep embedding</font>.</p>
+                    <p>&nbsp;</p>
+					<p><font class="emph1">Easier to program</font> DSLs for both <font class="emph2">DSL users</font> and <font class="emph2">DSL authors</font>.</p>
 				</section>
 				<section>
 					<h1>Questions?</h1>
