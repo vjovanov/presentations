@@ -306,10 +306,11 @@ Query(Coffees).map(c =>
 				    <p>Converts DSL intrinsics from the direct embedding into their deep counterparts.</p>
 				  </section>
 				  <section>
-				    <h2>Translation: <font class="emph1">Terms</font></h2>
+				    <h2>Translation: <font class="emph1">DSL Intrinsification</font></h2>
                     <ul>
 						<li>Injects the whole program into the DSL component</li>
-						<li>Replaces prefixes with <code>this</code></li>
+						<li>Explicitly handles constants and captured variables</li>
+                        <li>Translates types according to the configurable type transformer</li>
 					</ul>
 					<table class="reveal" >
 				  		<thead>
@@ -330,32 +331,14 @@ query {
 {
   Query(Coffees).map(c =>
     __if(infix_==(c.origin,"CH"),
-     , "Good"
-     , c.quality)
+      "Good",
+      c.quality
+    )
   )
 }
 					</code></pre></td></tr>
 				  		</tbody>
 					</table>
-				  </section>
-				  <section>
-				    <h2>Translation: <font class="emph1">Constants and Captured Variables</font></h2>
-</code></pre>
-<pre><code data-trim contenteditable class="scala">
-	def lift[T, Ret](v: T)
-	  (implicit liftEv: LiftEvidence[T, Ret]): Ret =
-      liftEv.lift(v)
-</code></pre>
-<pre><code data-trim contenteditable class="scala">
-new QueryDSL {
-  this.Query(Coffees).map(c =>
-    if(c.origin == "CH")
-      "Good"
-    else
-      c.quality
-  )
-}
-</code></pre>
 				  </section>
 				  <section>
 				    <h2>Type Translation: <font class="emph1">Generic Embedding</font></h2>
@@ -365,8 +348,8 @@ new QueryDSL {
                        \newcommand{\ttname}{\tau}
                        \newcommand{\ttarg}[1][]{\ttname_{\mathtt{arg}}(#1)}
                        \newcommand{\ttother}[1][]{\ttname (#1)}
-				       &\ttarg[T] & \; = \; &  T \\
-					   &\ttother[T] & \; = \; & \; Rep [ T ]
+                       &\ttother[T] & \; = \; & \; Rep [ T ] \\
+				       &\ttarg[T] & \; = \; &  T
                        \end{aligned}\]
 				    </p>
 				  </section>
@@ -378,49 +361,20 @@ new QueryDSL {
                          \newcommand{\ttname}{\tau}
 \newcommand{\ttarg}[1][]{\ttname_{\mathtt{arg}}(#1)}
 \newcommand{\ttother}[1][]{\ttname (#1)}
-                         &\ttarg[T\lbrack I_1,\ldots,I_n \rbrack]   & \; = \; & T[\ttarg[I_1],\ldots,\ttarg[I_n]] \\
-&\ttarg[T_1 \Rightarrow T_2] & \; = \; & \mathtt{error} \\
-&\ttarg[T] & \; = \; & T, \; \text{otherwise} \\ % \text{if } T \notin \{T_1 \Rightarrow T_2, T[I_1,\ldots,I_n]\} \\
+
 %&\ttother[T_1 \Rightarrow T_2] & \; = \; & \ttother[T_1] \Rightarrow \ttother[T_2]\\
 &\ttother[T_1 \Rightarrow T_2] & \; = \; & \text{Rep[}\ttarg[T_1]\text{]} \Rightarrow \text{Rep[}\ttarg[T_2]\text{]}\\
 &\ttother[T] & \; = \; & \text{Rep[} T \text{]},
-\; \text{otherwise}
+\; \text{otherwise} \\
+
+&\ttarg[T\lbrack I_1,\ldots,I_n \rbrack]   & \; = \; & T[\ttarg[I_1],\ldots,\ttarg[I_n]] \\
+&\ttarg[T_1 \Rightarrow T_2] & \; = \; & \mathtt{error} \\
+&\ttarg[T] & \; = \; & T, \; \text{otherwise} \\ % \text{if } T \notin \{T_1 \Rightarrow T_2, T[I_1,\ldots,I_n]\}
                          \end{aligned}\]
 				    </p>
-				  </section>
 				</section>
-                <section>
-                  <h2>Translation in Practice</h2>
-                  <table class="reveal" >
-                        <thead>
-                            <tr><th>Direct</th><th>Deep</th></tr>
-                        </thead>
-                      <tbody>
-                        <tr><td><pre><code data-trim contenteditable class="scala">
-{
-  Query(Coffees).map(c =>
-    if(c.origin == "CH")
-      "Good"
-    else
-      c.quality
-  )
-}
-                    </code></pre>
-                        </td><td><pre><code data-trim contenteditable class="scala">
-{
-  Query(Coffees).map(c =>
-    if(c.origin == "CH")
-      "Good"
-    else
-      c.quality
-  )
-}
-                    </code></pre></td></tr>
-                        </tbody>
-                    </table>
+				</section>
 
-                  </p>
-                </section>
 				<section>
                 <section>
 				    <h2>Language Restriction</h2>
@@ -512,7 +466,7 @@ def scan[T: Manifest] // Deep Embedding Interface
   QueryScan[T](self, pred) // IR Node (symbolic representation)
     .atPhase(lowering) {
     // lowering Rompf et al. [POPL 13'] (translated body of scan)
-    &lt;prettyPrint(yinYangTranslation(scan-body))&gt;
+    &lt;translate(scan-body)&gt;
   }
 </code></pre>
                 </section>
