@@ -383,7 +383,7 @@ query {
 new QueryDSL {
   this.Query(lift(Coffees)).map { c: Rep[T] =>
     if(c.origin == lift("CH")) {
-      println("Due to Nestle's good import policies!")
+      println("Due to Nestle's good import policy.")
       lift("Good")
     } else
       c.quality
@@ -395,15 +395,15 @@ new QueryDSL {
 <section>
 	<h2>Language Restriction:  <font class="emph1">Analysis</font></h2>
 
-				    <p>Analise weather operations in the direct embedding would compile with the deep embedding in a fine-grained way and report comprehensible error messages.</p>
+				    <p>Analise weather <font class="emph1">operations</font> in the direct embedding <font class="emph1">exist</font> in the deep embedding and report <font class="emph1">comprehensible error messages</font>.</p>
 <!-- <pre><code data-trim contenteditable class="scala">
 new QueryDSL {
   this.Predef.println(().asInstanceOf[Rep[String]])
 }
 </code></pre> -->
 <pre><code data-trim contenteditable class="bash">
-&lt;error&gt; Predef.println() is not supported by the DSL.
-println("Due to good import quality!")
+&lt;error&gt; Predef.println is not supported by the DSL.
+println("Due to Nestle's good import policy.")
 ^
 </code></pre>
 				</section>
@@ -462,12 +462,14 @@ def scan(pred: T => Boolean): Query[T] = &lt;scan-body&gt;
                     <p align="left">Generate:</p>
 <pre><code data-trim contenteditable class="scala">
 def scan[T: Manifest] // Deep Embedding Interface
-  (self : Rep[Query[T]], pred : ((Rep[T]) => Rep[Boolean])): Rep[Query[T]] =
+  (self: Rep[Query[T]],
+   pred : ((Rep[T]) => Rep[Boolean])): Rep[Query[T]] = {
   QueryScan[T](self, pred) // IR Node (symbolic representation)
     .atPhase(lowering) {
-    // lowering Rompf et al. [POPL 13'] (translated body of scan)
+    // lowering Rompf et al. [POPL 13']
     &lt;translate(scan-body)&gt;
   }
+}
 </code></pre>
                 </section>
 				</section>
