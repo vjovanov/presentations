@@ -16,4 +16,4 @@ object Virtualization {
   while (true) {
   	if (true) println("true") else println("false")
   }
-}
+}                                                              ;
