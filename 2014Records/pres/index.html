@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+
+        <title>Scala Records</title>
+
+        <meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+        <meta name="author" content="Vojin Jovanovic">
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <link rel="stylesheet" href="css/reveal.min.css">
+        <link rel="stylesheet" href="css/theme/simple.css" id="theme">
+        <link rel="stylesheet" href="css/custom.css">
+        <!-- <link rel="stylesheet" href="css/print/pdf.css"> -->
+
+        <style>
+         .reveal section img .plainimage1 img{border:0; opacity:0;}
+        </style>
+        <!-- For syntax highlighting -->
+        <link rel="stylesheet" href="lib/css/zenburn.css">
+
+        <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+        <script>
+            if( window.location.search.match( /print-pdf/gi ) ) {
+                var link = document.createElement( 'link' );
+                link.rel = 'stylesheet';
+                link.type = 'text/css';
+                link.href = 'css/print/pdf.css';
+                document.getElementsByTagName( 'head' )[0].appendChild( link );
+            }
+        </script>
+
+        <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+    </head>
+
+    <body>
+
+        <div class="reveal">
+
+            <!-- Any section element inside of this container is displayed as a slide -->
+            <div class="slides">
+                <section>
+                    <h1>Scala Records</h1>
+                    <h3>Towards Native Records in Scala</h3>
+                    <p><a href="http://vjovanov.com">Vojin Jovanovic</a>&nbsp&nbsp/&nbsp&nbsp<a href="http://twitter.com/vojjov">@vojjov</a></p>
+                    <p><a href="http://people.epfl.ch/184229">Tobias Schlatter</a>&nbsp&nbsp/&nbsp&nbsp<a href="@tobiasschlatter">@tobiasschlatter</a></p>
+                    <p><a href="http://people.epfl.ch/184229">Hubert Plociniczak</a></p>
+
+                </section>
+
+                <section>
+                  <section>
+                    <h2>Scala for Big-Data</h2>
+                    <p>
+                       In big-data users often process large structured data. Example:
+                    </p>
+                    <pre><code data-trim contenteditable class="scala">
+// Schema
+val jobSchema = List('start_date, 'jobid, 'is_hourly_project,
+    'hourly_rate_min, 'hourly_rate_max, 'hourly_rate_code,
+    'project_budget, 'budget_min, 'budget_max, 'list_job,
+    'prev_jobid, 'delete_yn)
+
+val jobs = load(jobPath, fields = jobSchema)
+</code></pre>
+                  </section>
+
+                  <section>
+                    <h2>Scala For Big-Data</h2>
+                    <pre><code data-trim contenteditable class="scala">
+jobs.filter('jobid) { id: Int => !ignoredJobs(id) }
+    .filter('list_job, 'prev_jobid, 'delete_yn) {
+      (lj: String, jobId: String, dyb: String) =>
+      lj == "N" || jobId != "None" || dyb == "Y"}
+
+    // ...
+    // ...
+    // ...
+    // ...
+
+    .map(('is_hourly_project, 'hourly_rate_min, 'hourly_rate_max,
+          'hourly_rate_code, 'project_budget, 'budget_min, 'budget_max) ->
+      ('budget, 'isHourly, 'hourlyRate)) {
+        (is_hourly_project: String, hourly_rate_min: String,
+        hourly_rate_max_str: String, hourly_rate_code_str: String,
+        project_budget: String, budget_min: String,
+        budget_max_str: String) =>
+
+    // ...
+    // ...
+    // ...
+    // ...
+
+gb.mapStream(
+      ('jobid, 'start_date, 'job_skills, 'seller_skills,
+       'catid, 'subcategory_id,'awarded_timestamp, 'amount_usd,
+       'name, 'description, 'job_tag_string, 'service_descr) ->
+      ('jobid1, 'start_date1, 'JsIntCsOvJsUCs, 'JsIntCsOvJs,
+       'JeIntCeOvJeUCe, 'Csp_xdIntJeOvCsp_xdUJe, 'Csp_xdIntJsOvJs,
+       'vZ1dotvZ4, 'Csp_xddotJe, 'NormvZ1dotvZ4, 'NormCsp_xddotJe,
+       'avg_amount, 'vCdotvJ, 'NormvCdotvJ)) {
+        it: Iterator[(Int, String, String, String, String, String,
+                      String, Double, String, String, String, String)] =>
+   // ...
+   // ...
+   // ...
+   // ...
+
+   // Numerical features
+   val (je, ce) =
+     (extendedSkills(bid._4), extendedSkills(bid._3))
+
+   // Base text features
+   val (jTitle, jDescr, jSkills, jTag) =
+     (bid._9, bid._10, skillNames(bid._3), bid._11)
+
+   val (cServiceDesc, cSkills) =
+    (bid._12, skillNames(bid._4))
+</code></pre>
+                  </section>
+                  <section>
+                    <h2>Scala for Big-Data</h2>
+                    <p>A manager: "Vojin, it takes my developers 6 months to get up to speed with Scalding. My friends tell me that with Cascalog it takes about 1-2 months. Scala is cool, but is all this worth it?</p>
+                    <p>&nbsp;</p>
+                    <p>Vojin: "Type-safety pays off in the long run and Scala will make your team work better!"</p>
+                  </section>
+                </section>
+                <section>
+                  <h2>Our Goals</h2>
+                  <ul>
+                    <li>Access fields with a path</li>
+                    <li>Auto completion works</li>
+                    <li>Errors are comprehensible</li>
+                    <li>Release the library in the wild to see what people need</li>
+                    <li>Based on experience find a cleaner solution</li>
+                  </ul>
+                </section>
+
+
+                <section>
+                    <section>
+                    <h2>How did we do it</h2>
+                      <p>Introduce a <code>Rec</code> type as a super type of all records.</p>
+                      <pre><code data-trim contenteditable class="scala">
+trait Rec {
+  def __data[T](field: String): T
+}
+                    </code></pre>
+                    </section>
+                    <section>
+                    <h2>How did we do it</h2>
+                      <p>Records are structural refinements of <code>Rec</code> where each method is a macro</p>
+                      <pre><code data-trim contenteditable class="scala">
+val person : Rec {
+  def name: String
+  def age: Int
+} = Rec(name = "Hannah", age = 30)
+                    </code></pre>
+                    </section>
+                    <section>
+                    <h2>How did we do it</h2>
+                      <p>Field accesses are not reflective but expand to a call to <code>__data</code></p>
+                      <pre><code data-trim contenteditable class="scala">
+[[person.name]] = person.__data[String]("name")
+                    </code></pre>
+                    </section>
+                </section>
+                <section>
+                    <h2>Demo</h2>
+                </section>
+                <section>
+                  <section>
+                    <h2>Records vs. HMaps</h2>
+                  </section>
+                  <section>
+                    <h2>HMaps Type Errors</h2>
+                    <pre><code data-trim contenteditable class="scala">
+scala> x.get("f6")
+console>:18: error: No field String("f6") in record shapeless.::[
+    Int with shapeless.record.KeyTag[String("f1"),Int],shapeless.::[
+    Int with shapeless.record.KeyTag[String("f2"),Int],shapeless.::[
+    Int with shapeless.record.KeyTag[String("f3"),Int],shapeless.::[
+    Int with shapeless.record.KeyTag[String("f4"),Int],shapeless.::[
+    Int with shapeless.record.KeyTag[String("f5"),Int],shapeless.HNil]]]]]
+              x.get("f6")
+                   ^
+                    </code></pre>
+                  </section>
+                  <section>
+                    <h2>The Runtime Benchmark</h2>
+                    <pre><code data-trim contenteditable class="scala">
+val rec = Create.Rec(35)
+(0 to 100000) foreach {_ => rec.$fPos }
+                  </code></pre>
+                </section>
+<section>
+                    <h2>The Runtime Benchmark</h2>
+                    <img src="runtime.png" width="850" height="550" class="plainimage1" alt="yin-yang">
+                </section>
+                <section>
+                  <h2>The Compile Time Benchmark</h2>
+                  <pre><code data-trim contenteditable class="scala">
+import shapeless._
+import syntax.singleton._
+object A {
+  val hmap = // hMapSize = p1
+    records.benchmark.HMapCompileTimeBenchmark.hmap
+  // accessNumber = 5
+  hmap.get("f5") // fieldNr = 5
+  hmap.get("f5")
+  hmap.get("f5")
+  hmap.get("f5")
+  hmap.get("f5")
+}
+                  </code></pre>
+                </section>
+                <section>
+                  <h2>HMaps Compile Time</h2>
+                  <p>Rec(hMapSize = 35, accessNumber=5, fieldNr=(1 to 35))</p>
+                  <img src="hmap-size.png" width="850" height="550" class="plainimage1" alt="yin-yang">
+                </section>
+                <section>
+                  <h2>HMaps Compile Time</h2>
+                  <p>Rec(hMapSize = 35, accessNumber=(1 to 10), fieldNr=5)</p>
+                  <img src="access-count.png" width="850" height="550" class="plainimage1" alt="yin-yang">
+                </section>
+                <section>
+                    <h2>HMaps Compile Time</h2>
+                    <p>Rec(hMapSize = (1 to 35), accessNumber = 5, fieldNr = 5)</p>
+                    <img src="hmaps-fields.png" width="850" height="550" class="plainimage1" alt="yin-yang">
+                </section>
+                <section>
+                    <h2>Records Compile Time</h2>
+                    <p>Rec(recSize = 100, accessNumber = (1 to 100), fieldNr = 1)</p>
+                    <img src="records-compile.png" width="850" height="550" class="plainimage1" alt="yin-yang">
+                </section>
+                </section>
+                <section>
+                  <h2>Implementation</h2>
+                  <ul>
+                     <li>Only the public API of macros</li>
+                     <li>crossScalaVersions := Seq(
+                        "2.10.2", "2.10.3", "2.10.4", "2.11.0", "2.11.1", "2.12.0-SNAPSHOT")</li>
+                     <li>54 test cases</li>
+                     <li>Specialized access to fields</li>
+                     <li>469 LOC with macro compat</li>
+                  </ul>
+                </section>
+                <section>
+                    <h2>Limitations</h2>
+                    <ul>
+                    <li>You never write Rec types explicitly</li>
+                    <li>2.10.x LUBs behave differently</li>
+                    <li>The Eclipse IDE debugger displays underlying data structures</li>
+                    <li>IntelliJ is not so nice</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Future Directions</h2>
+                    <ul>
+                    <li>Introduce CUD operations on <code>Rec</code></li>
+                    <li>Define records in terms of the core Scala calculus</li>
+                    <li>Figure out how the LUBs will work</li>
+                    <li>Find nice syntax for Records</li>
+                    </ul>
+                    <pre><code data-trim contenteditable class="scala">
+(name = "Hannah", age = "30")
+("Hannah", age = "30")
+("Hannah", "30")
+                    </code></pre>
+                </section>
+                <section>
+                    <h1>THE END</h1>
+                    <p>Scala Records&nbsp&nbsp/&nbsp&nbsp<a href="http://github.com/scala-records/scala-records">http://github.com/scala-records/scala-records</a></p>
+                    <p>By &nbsp&nbsp<a href="http://vjovanov.com">Vojin Jovanovic</a>&nbsp&nbsp/&nbsp&nbsp<a href="http://twitter.com/vojjov">@vojjov</a></p>
+                </section>
+
+            </div>
+
+        </div>
+
+        <script src="lib/js/head.min.js"></script>
+        <script src="js/reveal.min.js"></script>
+
+        <script>
+
+            // Full list of configuration options available here:
+            // https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+                controls: true,
+                progress: true,
+                history: true,
+                center: true,
+
+                theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+                transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+
+                // Parallax scrolling
+                // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+                // parallaxBackgroundSize: '2100px 900px',
+                math: {
+                    mathjax: 'http://cdn.mathjax.org/mathjax/latest/MathJax.js',
+                    config: 'TeX-AMS_HTML-full'  // See http://docs.mathjax.org/en/latest/config-files.html
+                },
+
+
+                // Optional libraries used to extend on reveal.js
+                dependencies: [
+                    { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+                    { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+                    { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+                    { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+                    { src: 'plugin/math/math.js', async: true }
+                ]
+            });
+
+        </script>
+    </body>
+</html>
