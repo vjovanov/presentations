@@ -513,79 +513,62 @@ new QueryDSL {
 <h2><b>Part II</b>: Automating Deep Embedding Development</h2>
 </section>
         <section>
-            <h2>Deep Embedding Generation</h2>
+            <h2>Shallow Embedding Interface</h2>
 <pre><code data-trim contenteditable class="scala">
-object BigDecimal {
-  def apply(s: String): BigDecimal =
-    new BigDecimal(new JBigDecimal(s))
-}
+class Vector[T: Numeric](val data: Seq[T]) {
+  def map[S: Numeric](f: T => S): Vector[S] =
+    new Vector(data.map(x => f(x)))
 
-class BigDecimal(val v: JBigDecimal) {
-  def +(lhs: BigDecimal): BigDecimal =
-    new BigDecimal(v.add(lhs.v))
-  def *(lhs: BigDecimal): BigDecimal =
-    new BigDecimal(v.multiply(lhs.v))
+  def +(that: Vector[T]): Vector[T] =
+    new Vector(data.zip(that.data)
+                   .map(x => x._1 + x._2))
 }
 </code></pre>
         </section>
 <section>
-  <h2>Generating an Interface</h2>
+  <h2>Generating a Deep Embedding Interface</h2>
 <pre><code data-trim contenteditable class="scala">
-trait BigDecimalOps extends Base with OverloadHack {
-  object BigDecimal {
-    def apply(s: Rep[String]): Rep[BigDecimal] = // ...
-  }
-  implicit class BigDecimalRep(self: Rep[BigDecimal]) {
-    def +(lhs: Rep[BigDecimal]): Rep[BigDecimal] = // ...
-    def *(lhs: Rep[BigDecimal]): Rep[BigDecimal] = // ...
+trait VectorOps extends Base {
+  implicit class VectorRep[T:Numeric:TypeTag](v: Rep[Vector[T]]) {
+    def data(implicit sc: SourceContext): Rep[Seq[T]] =
+      // ...
+
+    def +(that: Rep[Vector[T]])
+      (implicit sc: SourceContext):Rep[Vector[T]] =
+      // ...
+
+    def map[S:Numeric:TypeTag](f: Rep[T] => Rep[S])
+      (implicit sc: SourceContext): Rep[Vector[S]] =
+      // ...
   }
 }
 </code></pre>
 </section>
 <section>
-<h2>Generate an Intermediate Representation</h2>
+<h2>Generate Intermediate Representations</h2>
 <pre><code data-trim contenteditable class="scala">
-trait BigDecimalExp extends BigDecimalOps with BaseExp {
+trait VectorExp extends VectorOps with BaseExp {
   // case classes
-  case class BigDecimalNew
-    (v: Rep[BigDecimal]) extends Def[BigDecimal]
-  case class BigDecimal$plus
-    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]) extends Def[BigDecimal]
-  case class BigDecimal$times
-    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]) extends Def[BigDecimal]
-  case class Apply(s: Rep[String]) extends Def[BigDecimal]
-  // ...
+  case class VectorPlus[T:Numeric:TypeTag]
+             (self: Rep[T], v2: Rep[Int]) extends Def[Vector[T]]
+
+  def vector_plus[T:Numeric:TypeTag]
+      (self: Rep[Vector[T]], v2: Rep[Vector[T]])
+      (implicit sc: SourceContext): Rep[Vector[T]] =
+        VectorPlus(self, v2) // IR node construction
+
+  // IR constructors for ‘map‘ is elided
 }
 </code></pre>
         </section>
 <section>
-<h2>Generate Code Generation</h2>
-<pre><code data-trim contenteditable class="scala">
-override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
-  case BigDecimalNew(v) =>
-    stream.print("val " + quote(sym) + " = new BigDecimal")
-    stream.print("(")
-    stream.print(quote(v))
-    stream.print(")")
-    stream.println("")
-    // ...
-}
-</code></pre>
-
-</section>
-<section>
-  <h2>And Finally</h2>
+  <h2>And Finally User-Defined Optimizations</h2>
   <pre><code data-trim contenteditable class="scala">
-trait BigDecimalExpOpt extends BigDecimalExp {
-  override def bigDecimal$plus
-    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]): Rep[BigDecimal] = {
-    /* please add optimizations here */
-    super.bigDecimal$plus(self, lhs)
-  }
-  override def bigDecimal$times
-    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]): Rep[BigDecimal] = {
-    /* please add optimizations here */
-    super.bigDecimal$times(self, lhs)
+trait VectorExpOpt extends VectorExp {
+  override def vector_plus[T:Numeric:TypeTag]
+    (self: Rep[Vector[T]], v2: Rep[Vector[T]]): Rep[Vector[T]] = {
+      /* please add optimizations here */
+      super.vector_plus(self, v2)
   }
   // ...
 }
