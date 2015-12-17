@@ -109,7 +109,7 @@ WHERE  m.username = g.username
             <br/>
             <table class="reveal" >
               <thead>
-                <tr><th>DSLs</th><th align="center">External</th><th></th><th></th></tr>
+                <tr><th></th><th align="center">External DSLs</th><th></th><th></th></tr>
               </thead>
               <tbody>
                 <tr><td>User Friendly</td><td align="center"><font color="green">&#10003</font></td><td></td><td></td></tr>
@@ -192,7 +192,7 @@ execute(x)
             <br/>
             <table class="reveal" >
               <thead>
-                <tr><th>DSLs</th><th align="center">External</th><th align="center">Deep</th><th align="center">Shallow</th></tr>
+                <tr><th></th><th align="center">External DSLs</th><th align="center">Deep DSLs</th><th align="center">Shallow DSLs</th></tr>
               </thead>
               <tbody>
                 <tr><td>User Friendly</td><td align="center"><font color="green">&#10003</font></td><td align="center"><font color="red">X</font></td><td align="center"><font color="green">&#10003</font></td></tr>
@@ -215,7 +215,7 @@ execute(x)
             <br/>
             <table class="reveal" >
               <thead>
-                <tr><th>DSLs</th><th align="center">Combined Deep and Shallow</th><th align="center"></th></tr>
+                <tr><th>DSL Kind</th><th align="center">Deep and Shallow Combined</th><th align="center"></th></tr>
               </thead>
               <tbody>
                 <tr><td>User Friendly</td><td align="center"><font color="green">&#10003</font></td><td align="center">Part I</td></tr>
@@ -319,7 +319,7 @@ execute(x)
 </section>
         <section>
         <section>
-          <h2>Translation to the Deep Embedding</h2>
+          <h2><span class="emph">Translation</span> to the <span class="emph1">Deep Embedding</span></h2>
           <table class="reveal" >
               <thead>
                 <tr><th>Direct</th><th>Deep</th></tr>
@@ -354,7 +354,7 @@ execute(x)
         </section>
 
         <section>
-            <h2>Language Virtualization</h2>
+            <h2>Translation: <span class="emph1">Language Virtualization</span></h2>
             <p>Functions</p>
                   <img src="images/lang-virt.png"/>
 
@@ -367,10 +367,7 @@ execute(x)
         </section>
         <section>
           <section>
-            <h2>DSL Intrinsification</h2>
-          </section>
-          <section>
-            <h2>Constants and Free Variables</h2>
+            <h2>Translation: <span class="emph1">Constants and Free Variables</span></h2>
 </code></pre>
 <pre><code data-trim contenteditable class="scala">
   def lift[T, Ret](v: T)
@@ -389,7 +386,7 @@ new QueryDSL {
 </code></pre>
           </section>
           <section>
-            <h2>Type Translation</h2>
+            <h2>Translation: <span class="emph1">Types</span></h2>
             <p>Generic Polymorphic Embedding</p>
                \[\begin{aligned}
                &\tau_{arg}(T) & = & \; T \\
@@ -414,12 +411,12 @@ new QueryDSL {
           <section>
             <h2>Operation Translation</h2>
             <br/>
-            <p>Maps direct operations to the deep operations</p>
+            <p>Maps <span class="emph">direct operations</span> to the <span class="emph1">deep operations</span></p>
             <ul>
             <li>Defined as a composition of <i>inject</i> and <i>rebind</i></li>
             </ul>
             <br/>
-            <p>Operation <i>inject</i> injects the deep operations in the scope</p>
+            <p>Operation <i>inject</i> <span class="emph">injects the deep operations in the scope</p>
             $\;[dsl] \; = \; \mathbf{new}\;\;dDSL\;\;\{\;\;\mathbf{def}\;\;\mathtt{main}():\;\;\tau(T)\;=\;dsl\;\}$
             <br/>
             $[dsl] \; = \; \mathbf{val}\;\;c \; = \; \mathbf{new}\;\;dDSL;\;\;\;\mathbf{import}\;\;c.\_;\;\;\;dsl$
@@ -428,21 +425,21 @@ new QueryDSL {
             <p>Operation <i>rebind</i> maps a direct operation to a deep operation</p>
           </section>
           <section>
-            <h2>Translation Preserves Well-Typedness</h2>
+            <h2><span class="emph">Translation</span> Preserves <span class="emph1">Well-Typedness</span></h2>
             <br/>
             <p>Generic Polymorphic Embedding</p>
             <ul>
-            <li>Proven by Carette et al. 2009</li>
+            <li><span class="emph">Proven</span> by Carette et al. 2009</li>
             </ul>
             <br/>
             <p>Eager Inlining</p>
             <ul>
-            <li>Proven in the thesis</li>
+            <li><span class="emph">Proven</span> in A.1 of the <span class="emph1">thesis</span></li>
             </ul>
             <br/>
             <p>Custom Types</p>
             <ul>
-            <li>Correctness depends on the deep embedding type definition</li>
+            <li>Correctness <span class="emph">depends</span> on the deep embedding <span class="emph1">implementation</span></li>
             </ul>
 
           </section>
