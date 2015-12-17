@@ -15,6 +15,7 @@
 p { text-align: left; }
 .emph { color: red; }
 .emph1 { color:  #b30000; }
+.advantage { color:  green; }
 .central {text-align: center;}
 .smallish {font-size: 0.7em;}
 </style>
@@ -141,14 +142,15 @@ val username = (q1 join q2)
   .map(_._1.username)
           </code></pre>
           <br/>
-          <p>Embedded DSLs <span class="emph">reuse</span> the facilities of the host language </p>
+          <!-- <p>Embedded DSLs <span class="emph">reuse</span> the facilities of the host language </p>
           <br/>
-          <p>Reuse of host language facilities <span class="emph">simplifies</span> development</p>
+          <p>Reuse of host language facilities <span class="emph">simplifies</span> development</p> -->
+          <p><span class="emph">Reuse</span> of the host language facilities <span class="emph1">simplifies</span> the development process</p>
           </section>
           <section>
             <h2>Shallow Embedding</h2>
             <br/>
-            <p>Values in the embedded language are <span class="emph">directly represented</span> by the values in the host language:</p>
+            <p>Values in the embedded language are <span class="emph1">directly represented</span> by the <span class="emph">values</span> in the host language:</p>
             <pre><code data-trim contenteditable class="scala">
 val (q1, q2) = (Query[GmailAccount], Query[GithubAccount])
 val username: String = (q1 join q2)
@@ -157,14 +159,15 @@ val username: String = (q1 join q2)
     .filter({ case (_, g) => g.languageLevel > 30})
     .map(_._1.username)
             </code></pre>
-            <p><span class="emph">User friendly</span> as they fit well in the host language</p>
+            <p><span class="advantage">User friendly</span> as they fit well in the host language</p>
             <p><span class="emph">Low performance</span> due to abstraction overhead and lack of domain knowledge</p>
+            <p>TODO direct embedding</p>
           </section>
 
 
           <section>
             <h2>Deep Embedding</h2>
-            <p>Values in the embedded language are represented <span class="emph">symbolically</span> by the values in the host language</p>
+            <p>Values in the embedded language are represented <span class="emph1">symbolically</span> by the values in the host language</p>
             <pre><code data-trim contenteditable class="scala">
 // symbolic representation
 trait Rep[T]
@@ -180,8 +183,8 @@ val y: Rep[Int] = 1024
 val x: Rep[Int] = y - 1
 execute(x)
 </code></pre>
-<p>Leak internals so <span class="emph">user friendliness suffers</span></p>
-<p><span class="emph">High performance</span> due to access to the domain-knowledge</p>
+<p>Leak internals, hence <span class="emph">not user friendly</span></p>
+<p><span class="advantage">High performance</span> due to access to the domain-knowledge</p>
 
           </section>
 				<section>
@@ -537,79 +540,62 @@ println("Due to Nestle's good import policy.")
 <h2><b>Part II</b>: Automating Deep Embedding Development</h2>
 </section>
         <section>
-            <h2>Deep Embedding Generation</h2>
+            <h2>Shallow Embedding Interface</h2>
 <pre><code data-trim contenteditable class="scala">
-object BigDecimal {
-  def apply(s: String): BigDecimal =
-    new BigDecimal(new JBigDecimal(s))
-}
+class Vector[T: Numeric](val data: Seq[T]) {
+  def map[S: Numeric](f: T => S): Vector[S] =
+    new Vector(data.map(x => f(x)))
 
-class BigDecimal(val v: JBigDecimal) {
-  def +(lhs: BigDecimal): BigDecimal =
-    new BigDecimal(v.add(lhs.v))
-  def *(lhs: BigDecimal): BigDecimal =
-    new BigDecimal(v.multiply(lhs.v))
+  def +(that: Vector[T]): Vector[T] =
+    new Vector(data.zip(that.data)
+                   .map(x => x._1 + x._2))
 }
 </code></pre>
         </section>
 <section>
-  <h2>Generating an Interface</h2>
+  <h2>Generating a Deep Embedding Interface</h2>
 <pre><code data-trim contenteditable class="scala">
-trait BigDecimalOps extends Base with OverloadHack {
-  object BigDecimal {
-    def apply(s: Rep[String]): Rep[BigDecimal] = // ...
-  }
-  implicit class BigDecimalRep(self: Rep[BigDecimal]) {
-    def +(lhs: Rep[BigDecimal]): Rep[BigDecimal] = // ...
-    def *(lhs: Rep[BigDecimal]): Rep[BigDecimal] = // ...
+trait VectorOps extends Base {
+  implicit class VectorRep[T:Numeric:TypeTag](v: Rep[Vector[T]]) {
+    def data(implicit sc: SourceContext): Rep[Seq[T]] =
+      // ...
+
+    def +(that: Rep[Vector[T]])
+      (implicit sc: SourceContext):Rep[Vector[T]] =
+      // ...
+
+    def map[S:Numeric:TypeTag](f: Rep[T] => Rep[S])
+      (implicit sc: SourceContext): Rep[Vector[S]] =
+      // ...
   }
 }
 </code></pre>
 </section>
 <section>
-<h2>Generate an Intermediate Representation</h2>
+<h2>Generate Intermediate Representations</h2>
 <pre><code data-trim contenteditable class="scala">
-trait BigDecimalExp extends BigDecimalOps with BaseExp {
+trait VectorExp extends VectorOps with BaseExp {
   // case classes
-  case class BigDecimalNew
-    (v: Rep[BigDecimal]) extends Def[BigDecimal]
-  case class BigDecimal$plus
-    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]) extends Def[BigDecimal]
-  case class BigDecimal$times
-    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]) extends Def[BigDecimal]
-  case class Apply(s: Rep[String]) extends Def[BigDecimal]
-  // ...
+  case class VectorPlus[T:Numeric:TypeTag]
+             (self: Rep[T], v2: Rep[Int]) extends Def[Vector[T]]
+
+  def vector_plus[T:Numeric:TypeTag]
+      (self: Rep[Vector[T]], v2: Rep[Vector[T]])
+      (implicit sc: SourceContext): Rep[Vector[T]] =
+        VectorPlus(self, v2) // IR node construction
+
+  // IR constructors for ‘map‘ is elided
 }
 </code></pre>
         </section>
 <section>
-<h2>Generate Code Generation</h2>
-<pre><code data-trim contenteditable class="scala">
-override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
-  case BigDecimalNew(v) =>
-    stream.print("val " + quote(sym) + " = new BigDecimal")
-    stream.print("(")
-    stream.print(quote(v))
-    stream.print(")")
-    stream.println("")
-    // ...
-}
-</code></pre>
-
-</section>
-<section>
-  <h2>And Finally</h2>
+  <h2>And Finally User-Defined Optimizations</h2>
   <pre><code data-trim contenteditable class="scala">
-trait BigDecimalExpOpt extends BigDecimalExp {
-  override def bigDecimal$plus
-    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]): Rep[BigDecimal] = {
-    /* please add optimizations here */
-    super.bigDecimal$plus(self, lhs)
-  }
-  override def bigDecimal$times
-    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]): Rep[BigDecimal] = {
-    /* please add optimizations here */
-    super.bigDecimal$times(self, lhs)
+trait VectorExpOpt extends VectorExp {
+  override def vector_plus[T:Numeric:TypeTag]
+    (self: Rep[Vector[T]], v2: Rep[Vector[T]]): Rep[Vector[T]] = {
+      /* please add optimizations here */
+      super.vector_plus(self, v2)
   }
   // ...
 }
