@@ -534,7 +534,7 @@ println("Due to Nestle's good import policy.")
 <h2><b>Part II</b>: Automating Deep Embedding Development</h2>
 </section>
         <section>
-            <h2>Shallow Embedding Interface</h2>
+            <h2>Direct Embedding Interface</h2>
 <pre><code data-trim contenteditable class="scala">
 class Vector[T: Numeric](val data: Seq[T]) {
   def map[S: Numeric](f: T => S): Vector[S] =
@@ -583,7 +583,7 @@ trait VectorExp extends VectorOps with BaseExp {
 </code></pre>
         </section>
 <section>
-  <h2>And Finally User-Defined Optimizations</h2>
+  <h2>User-Defined Optimizations</h2>
   <pre><code data-trim contenteditable class="scala">
 trait VectorExpOpt extends VectorExp {
   override def vector_plus[T:Numeric:TypeTag]
@@ -592,6 +592,31 @@ trait VectorExpOpt extends VectorExp {
       super.vector_plus(self, v2)
   }
   // ...
+}
+</code></pre>
+</section>
+<section>
+  <h2>And Finally Lowering</h2>
+  <pre><code data-trim contenteditable class="scala">
+trait VectorLowLevel extends VectorOps
+      with SeqLowLevel {
+  // Low level implementations
+  override def vector_plus[T:Numeric:TypeTag]
+    (self: Rep[Vector[T]], v2: Rep[Vector[T]]): Rep[Vector[T]] = {
+      VectorPlus(self, v2) atPhase(Lowering) {
+        $newVector(self.data.zip(v2.data).map($lam {
+          x => x._1 + x._2
+        }))
+      }
+    }
+}
+</code></pre>
+<pre><code data-trim contenteditable class="scala">
+class Vector[T: Numeric](val data: Seq[T]) {
+  def +(that: Vector[T]): Vector[T] =
+    new Vector(data.zip(that.data).map({
+      x => x._1 + x._2
+    }))
 }
 </code></pre>
 </section>
