@@ -409,7 +409,7 @@ new QueryDSL {
 
           </section>
           <section>
-            <h2>Operation Translation</h2>
+            <h2>Translation: <span class="emph1">Operations</span></h2>
             <br/>
             <p>Maps <span class="emph">direct operations</span> to the <span class="emph1">deep operations</span></p>
             <ul>
@@ -447,22 +447,46 @@ new QueryDSL {
 
         <section>
         <section>
-          <h2>Reification at Host-Language Compile-Time</h2>
+          <h2><span class="emph">Reification</span> at Host-Language <span class="emph1">Compile-Time</span></h2>
         </section>
 
         <section>
-          <h2>Reification via Interpretation</h2>
+          <h2><span class="emph">Reification</span> via <span class="emph1">Interpretation</span></h2>
         </section>
         </section>
         <section>
         <section>
-        <h2>Language Restriction</h2>
-            <p>Check if the direct embedding complies with the deep embedding in a fine-grained way and report comprehensible error messages.</p>
+                <section>
+            <h2>Error Reporting: Language Restriction</h2>
+            <p>Direct embedding API can be richer than the deep embedding.</p>
 <pre><code data-trim contenteditable class="scala">
+new QueryDSL {
+  this.Query(lift(Coffees)).map { c: Rep[T] =>
+    if(c.origin == lift("CH")) {
+      println("Due to Nestle's good import policy.")
+      lift("Good")
+    } else
+      c.quality
+  }
+}
+</code></pre>
+        </section>
+
+<section>
+  <h2>Language Restriction:  <font class="emph1">Analysis</font></h2>
+
+            <p>Analise weather <font class="emph1">operations</font> in the direct embedding <font class="emph1">exist</font> in the deep embedding and report <font class="emph1">comprehensible error messages</font>.</p>
+<!-- <pre><code data-trim contenteditable class="scala">
 new QueryDSL {
   this.Predef.println(().asInstanceOf[Rep[String]])
 }
+</code></pre> -->
+<pre><code data-trim contenteditable class="bash">
+&lt;error&gt; Predef.println is not supported by the DSL.
+println("Due to Nestle's good import policy.")
+^
 </code></pre>
+        </section>
         </section>
         <section>
         <h2>Error Reporting at Host-Language Compile Time</h2>
