@@ -16,6 +16,7 @@ p { text-align: left; }
 .emph { color: red; }
 .emph1 { color:  #b30000; }
 .central {text-align: center;}
+.smallish {font-size: 0.7em;}
 </style>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
 
@@ -48,6 +49,7 @@ p { text-align: left; }
 				<section>
 					<h2>Language Support for Embedded<br/>Domain-Specific Languages</h1>
 					<h3>PhD Thesis Defense</h3>
+          <br/>
           <br/>
           <br/>
           <br/>
@@ -121,7 +123,7 @@ WHERE  m.username = g.username
             <br/>
             <br/>
             <br/>
-            <small>1. Language workbenches aim to simplify DSL development.</small>
+            <p style="font-size: 0.7em;">1. Language workbenches aim to simplify DSL development.</p>
           </section>
 
         </section>
@@ -222,9 +224,9 @@ execute(x)
               </tbody>
           </table>
           <br/>
-          <p>Part I: User friendliness matters during program development and performance in production. Use shallow embedding for program development and <span class="emph">translate</span> to the deep embedding in production.</p>
+          <p><b>Part I</b>: User friendliness matters during program development and performance in production. Use shallow embedding for program development and <span class="emph">translate</span> to the deep embedding in production.</p>
 
-          <p>Part II: Use the shallow embedding as a specification for <span class="emph">generating the deep embedding</span>. Simplify development of DSLs compiled in two stages.</p>
+          <p><b>Part II</b>: Use the shallow embedding as a specification for <span class="emph">generating the deep embedding</span>. Simplify development of DSLs compiled in two stages.</p>
 
       </section>
 
@@ -309,7 +311,7 @@ execute(x)
 </code></pre>
 <p>Overheads range from <span class="emph">0.2 - 24 $\mu$s</span> per line of code (LoC)$^1$</span></p>
 
-<small>1. Each line contains 5 IR nodes.</small>
+<p style="font-size: 0.7em;">1. A line of code reifies 5 IR nodes.</small>
              </section>
         </section>
 
@@ -353,7 +355,7 @@ execute(x)
 
         <section>
             <h2>Language Virtualization</h2>
-            <p>Optional translation of functions</p>
+            <p>Functions</p>
                   <img src="images/lang-virt.png"/>
 
             <p>Control Constructs</p>
