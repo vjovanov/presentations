@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Language Support for Embedded Domain-Specific Languages</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style type="text/css">
+p { text-align: left; }
+.emph { color: red; }
+.emph1 { color:  #b30000; }
+.central {text-align: center;}
+</style>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/simple-mod.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h2>Language Support for Embedded<br/>Domain-Specific Languages</h1>
+					<h3>PhD Thesis Defense</h3>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <img src="images/EPFL-Logo.jpg"/>
+					<p class="central">
+						Student: Vojin Jovanovic &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; Advisor: Martin Odersky
+					</p>
+				</section>
+
+
+				<!-- Example of nested vertical slides -->
+				<section>
+          <section>
+            <h2>External Domain-Specific Languages</h2>
+            <br/>
+            <p><span class="emph">Restricted</span> and <span class="emph1">user friendly</span> language for a specific domain:</p>
+            <pre><code data-trim contenteditable class="sql lasso">
+SELECT name, email
+FROM   gmail_accounts as m, github_accounts as g
+WHERE  m.username = g.username
+   AND prog_language = "Scala"
+   AND lang_level > 30
+          </code></pre>
+          <br/>
+          <p><span class="emph">Domain knowledge</span> enables  <span class="emph1">orders-of-magnitude speedups</span>:</p>
+          <p style="text-align: center;">
+            $R \bowtie S = S \bowtie R$
+          </p>
+          <p style="text-align: center;">
+            $(R \bowtie S) \bowtie T = R \bowtie (S \bowtie T)$
+          </p>
+          </section>
+          <section>
+          <h2>Properties of External DSLs</h2>
+          <br/>
+           <p>For a <span class="emph">DSL user</span> an external DSL:</p>
+            <ul>
+              <li>Provides a <span class="emph1">friendly interface</span></li>
+              <li>Exhibits <span class="emph1">high performance</span></li>
+            </ul>
+            <br/>
+            <p>To develop an external DSL a <span class="emph">DSL author</span> must:</p>
+            <ul>
+              <li>Implement a parser</li>
+              <li>Implement a typechecker</li>
+              <li>Implement a back-end</li>
+              <li>Provide IDE integration, debugging, and other tools</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Summary of External DSLs</h2>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <table class="reveal" >
+              <thead>
+                <tr><th>DSLs</th><th align="center">External</th><th></th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr><td>User Friendly</td><td align="center"><font color="green">&#10003</font></td><td></td><td></td></tr>
+                <tr><td>High-Performance</td><td align="center"><font color="green">&#10003</font></td><td></td><td></td></tr>
+                <tr><td>Easy to Develop</td><td align="center"><font color="red">X</font>$^1$</td><td></td><td></td></tr>
+              </tbody>
+          </table>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <small>1. Language workbenches aim to simplify DSL development.</small>
+          </section>
+
+        </section>
+        <section>
+          <section>
+            <h2>Embedded Domain-Specific Languages</h2>
+            <br/>
+            <p>DSLs <span class="emph">embedded</span> in an existing general purpose <span class="emph1">host language</span>:</p>
+            <pre><code data-trim contenteditable class="scala">
+val (q1, q2) = (Query[GmailAccount], Query[GithubAccount])
+val username = (q1 join q2)
+  .filter({ case (m, g) => m.username == g.username})
+  .filter({ case (m, _) => m.progLanguage == "Scala"})
+  .filter({ case (_, g) => g.languageLevel > 30})
+  .map(_._1.username)
+          </code></pre>
+          <br/>
+          <p>Embedded DSLs <span class="emph">reuse</span> the facilities of the host language </p>
+          <br/>
+          <p>Reuse of host language facilities <span class="emph">simplifies</span> development</p>
+          </section>
+          <section>
+            <h2>Shallow Embedding</h2>
+            <br/>
+            <p>Values in the embedded language are <span class="emph">directly represented</span> by the values in the host language:</p>
+            <pre><code data-trim contenteditable class="scala">
+val (q1, q2) = (Query[GmailAccount], Query[GithubAccount])
+val username: String = (q1 join q2)
+    .filter({ case (m, g) => m.username == g.username})
+    .filter({ case (m, _) => m.progLanguage == "Scala"})
+    .filter({ case (_, g) => g.languageLevel > 30})
+    .map(_._1.username)
+            </code></pre>
+            <p><span class="emph">User friendly</span> as they fit well in the host language</p>
+            <p><span class="emph">Low performance</span> due to abstraction overhead and lack of domain knowledge</p>
+          </section>
+
+
+          <section>
+            <h2>Deep Embedding</h2>
+            <p>Values in the embedded language are represented <span class="emph">symbolically</span> by the values in the host language</p>
+            <pre><code data-trim contenteditable class="scala">
+// symbolic representation
+trait Rep[T]
+case class Const(v: Int) extends Rep[Int]
+case class Minus(l: Rep[Int], r: Rep[Int]) extends Rep[Int]
+// lifting
+implicit def lift(i: Int): Rep[Int] = Const(i)
+implicit class IntOps(l: Rep[Int]) {
+  def -(r: Rep[Int]): Rep[Int] = Minus(l, r)
+}
+
+val y: Rep[Int] = 1024
+val x: Rep[Int] = y - 1
+execute(x)
+</code></pre>
+<p>Leak internals so <span class="emph">user friendliness suffers</span></p>
+<p><span class="emph">High performance</span> due to access to the domain-knowledge</p>
+
+          </section>
+				<section>
+					<h2>No "Silver Bullet" for Implementing DSLs</h2>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <table class="reveal" >
+              <thead>
+                <tr><th>DSLs</th><th align="center">External</th><th align="center">Deep</th><th align="center">Shallow</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>User Friendly</td><td align="center"><font color="green">&#10003</font></td><td align="center"><font color="red">X</font></td><td align="center"><font color="green">&#10003</font></td></tr>
+                <tr><td>High-Performance</td><td align="center"><font color="green">&#10003</font></td><td align="center"><font color="green">&#10003</font></td><td align="center"><font color="red">X</font></td></tr>
+                <tr><td >Easy to Develop</td><td align="center"><font color="red">X</font></td><td align="center">O</td><td align="center"><font color="green">&#10003</font></td></tr>
+              </tbody>
+          </table>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+
+				</section>
+      </section>
+
+      <section>
+      <h2>This Thesis</h2>
+            <br/>
+            <table class="reveal" >
+              <thead>
+                <tr><th>DSLs</th><th align="center">Combined Deep and Shallow</th><th align="center"></th></tr>
+              </thead>
+              <tbody>
+                <tr><td>User Friendly</td><td align="center"><font color="green">&#10003</font></td><td align="center">Part I</td></tr>
+                <tr><td>High-Performance</td></td><td align="center"><font color="green">&#10003</font></td><td align="center">Part I</td></tr>
+                <tr><td >Easy to Develop</td><td align="center"><font color="green">&#10003</font></td><td align="center">Part II</td></tr>
+              </tbody>
+          </table>
+          <br/>
+          <p>Part I: User friendliness matters during program development and performance in production. Use shallow embedding for program development and <span class="emph">translate</span> to the deep embedding in production.</p>
+
+          <p>Part II: Use the shallow embedding as a specification for <span class="emph">generating the deep embedding</span>. Simplify development of DSLs compiled in two stages.</p>
+
+      </section>
+
+      <section>
+      <br/><br/><br/><br/><br/><br/>
+<h2><b>Part I</b>: Improving the User Experience with Deep Embeddings</h2>
+      </section>
+      <section>
+      <section>
+            <h2>Abstraction Leaks in the Deep Embedding</h2>
+            <p>DSL types are necessarily <span class="emph">exposed</span> in the <span class="emph1">interface</span>:</p>
+            <pre><code data-trim contenteditable class="scala">
+def map[U](fn: Rep[T => U]): Rep[Vector[U]]
+</code></pre>
+<p>Type <code data-trim contenteditable class="scala">Rep[T => U]</code> raises questions:</p>
+<ul>
+  <li>Is <code data-trim contenteditable class="scala">Rep[T => U]</code> a function? How is it applied correctly?</li>
+  <li>Why not <code data-trim contenteditable class="scala">Rep[T] => Rep[U]</code>?</li>
+  <li>Why not <code data-trim contenteditable class="scala">Vector[Rep[T]]</code>?</li>
+</ul>
+<p>Defining <span class="emph">recursive</span> functions becomes <span class="emph1">complicated</span>:</p>
+<pre><code data-trim contenteditable class="scala">
+def fact(n: Rep[Int]) = n * fact(n - 1)
+</code></pre>
+<p>always causes infinite recursion.</p>
+</section>
+<section>
+              <h2>Deep Embedding - Troubles Debugging</h2>
+              <br/>
+              <p>Stepping inspecting values and stepping into functions:</p>
+              <img src="images/debug11.png"></img>
+              <br/>
+              <p>reveals the <span class="emph">intermediate representation</span> (IR):</p>
+              <img src="images/debug2.png"></img>
+            </section>
+<section>
+
+              <h2>Deep Embedding - Cryptic Type Errors</h2>
+              <br/>
+              <p>A seemingly correct query:</p>
+<pre><code data-trim contenteditable class="scala">
+Query[Coffees].map(c =>
+  if(c.origin == "CH")
+    "Good"
+  else
+    c.quality
+)
+</code></pre>
+<p>Yields incomprehensible type errors:</p>
+<pre>
+<font class="emph1">&lt;error&gt;</font> Don’t know how to unpack Any to T and pack to G
+<font class="emph1">&lt;error&gt;</font> Not enough arguments in method
+map: (implicit shape: scala.ql.lifted.Shape[Any,T,G])
+:scala.slick.lifted.Query[G,T]
+</pre>
+
+
+<p>Performs domain-specific error reporting at runtime:</p>
+<pre>
+<font class="emph1">&lt;error&gt;</font> Can not compile a conditional expression to SQL.
+</pre>
+
+             </section>
+             <section>
+             <h2>Runtime Overheads</h2>
+             <br/>
+             <p>IR construction and DSL compilation <span class="emph">executed every time</span></p>
+            <pre><code data-trim contenteditable class="scala">
+// symbolic representation
+trait Rep[T]
+case class Const(v: Int) extends Rep[Int]
+case class Minus(l: Rep[Int], r: Rep[Int]) extends Rep[Int]
+// lifting
+implicit def lift(i: Int): Rep[Int] = Const(i)
+implicit class IntOps(l: Rep[Int]) {
+  def -(r: Rep[Int]): Rep[Int] = Minus(l, r)
+}
+
+val y: Rep[Int] = 1024
+val x: Rep[Int] = y - 1
+execute(x)
+</code></pre>
+<p>Overheads range from <span class="emph">0.2 - 24 $\mu$s</span> per line of code (LoC)$^1$</span></p>
+
+<small>1. Each line contains 5 IR nodes.</small>
+             </section>
+        </section>
+
+
+</section>
+        <section>
+        <section>
+          <h2>Translation to the Deep Embedding</h2>
+          <table class="reveal" >
+              <thead>
+                <tr><th>Direct</th><th>Deep</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><pre><code data-trim contenteditable class="scala">
+{
+  Query[Coffees].map {
+    (c: Coffee) =>
+      if(c.origin == "CH")
+        "Good"
+      else
+        c.quality
+    }
+}
+          </code></pre>
+                </td><td><pre><code data-trim contenteditable class="scala">
+{
+  Query[Coffees].map {
+    (c: Coffee) =>
+      if(c.origin == "CH")
+        "Good"
+      else
+        c.quality
+    }
+}
+          </code></pre></td></tr>
+              </tbody>
+          </table>
+          <img width="85%" src="images/pipeline.png"/>
+        </section>
+        </section>
+
+        <section>
+            <h2>Language Virtualization</h2>
+            <p>Optional translation of functions</p>
+                  <img src="images/lang-virt.png"/>
+
+            <p>Control Constructs</p>
+                <img src="images/lang-const.png"/>
+
+            <p>Methods, value binders, pattern matching, <i>new</i>, and <i>AnyRef</i></p>
+
+          </section>
+        </section>
+        <section>
+          <section>
+            <h2>DSL Intrinsification</h2>
+          </section>
+          <section>
+            <h2>Constants and Free Variables</h2>
+</code></pre>
+<pre><code data-trim contenteditable class="scala">
+  def lift[T, Ret](v: T)
+    (implicit liftEv: LiftEvidence[T, Ret]): Ret =
+      liftEv.lift(v)
+</code></pre>
+<pre><code data-trim contenteditable class="scala">
+new QueryDSL {
+  this.Query(Coffees).map(c =>
+    if(c.origin == "CH")
+      "Good"
+    else
+      c.quality
+  )
+}
+</code></pre>
+          </section>
+          <section>
+            <h2>Type Translation</h2>
+            <p>Generic Polymorphic Embedding</p>
+               \[\begin{aligned}
+               &\tau_{arg}(T) & = & \; T \\
+             &\tau(T) & = & \; Rep [ T ]
+                         \end{aligned}\]
+            </p>
+            <p>Eager Inlining (disabled function virtualization)</p>
+            \[\begin{aligned}
+
+&\tau_{arg}(T_1 \Rightarrow T_2) &=& \; \mathtt{error} \\
+&\tau_{arg}(T) & = & \; T \\
+&\tau(T_1 \Rightarrow T_2) & = & \; \tau(T_1) \Rightarrow \tau(T_2) \\
+&\tau(T) & = & \; Rep[T]
+                         \end{aligned}\]
+          <p>Custom Types</p>
+          \[\begin{aligned}
+&\tau_{arg}(T) &  =  & \; this.T\\
+&\tau(T) &  =  & \; this.T\\
+                         \end{aligned}\]
+
+          </section>
+          <section>
+            <h2>Operation Translation</h2>
+            <br/>
+            <p>Maps direct operations to the deep operations</p>
+            <ul>
+            <li>Defined as a composition of <i>inject</i> and <i>rebind</i></li>
+            </ul>
+            <br/>
+            <p>Operation <i>inject</i> injects the deep operations in the scope</p>
+            $\;[dsl] \; = \; \mathbf{new}\;\;dDSL\;\;\{\;\;\mathbf{def}\;\;\mathtt{main}():\;\;\tau(T)\;=\;dsl\;\}$
+            <br/>
+            $[dsl] \; = \; \mathbf{val}\;\;c \; = \; \mathbf{new}\;\;dDSL;\;\;\;\mathbf{import}\;\;c.\_;\;\;\;dsl$
+            <br/>
+
+            <p>Operation <i>rebind</i> maps a direct operation to a deep operation</p>
+          </section>
+          <section>
+            <h2>Translation Preserves Well-Typedness</h2>
+            <br/>
+            <p>Generic Polymorphic Embedding</p>
+            <ul>
+            <li>Proven by Carette et al. 2009</li>
+            </ul>
+            <br/>
+            <p>Eager Inlining</p>
+            <ul>
+            <li>Proven in the thesis</li>
+            </ul>
+            <br/>
+            <p>Custom Types</p>
+            <ul>
+            <li>Correctness depends on the deep embedding type definition</li>
+            </ul>
+
+          </section>
+        </section>
+
+        <section>
+        <section>
+          <h2>Reification at Host-Language Compile-Time</h2>
+        </section>
+
+        <section>
+          <h2>Reification via Interpretation</h2>
+        </section>
+        </section>
+        <section>
+        <section>
+        <h2>Language Restriction</h2>
+            <p>Check if the direct embedding complies with the deep embedding in a fine-grained way and report comprehensible error messages.</p>
+<pre><code data-trim contenteditable class="scala">
+new QueryDSL {
+  this.Predef.println(().asInstanceOf[Rep[String]])
+}
+</code></pre>
+        </section>
+        <section>
+        <h2>Error Reporting at Host-Language Compile Time</h2>
+            <p></p>
+        </section>
+        </section>
+
+
+        <section>
+        <section>
+          <h2>Reducing Run-Time Overheads</h2>
+        </section>
+
+        <section>
+          <h2>Reducing Run-Time Overheads</h2>
+        </section>
+        </section>
+
+        <section>
+        <section>
+          <h2>Putting it All Together</h2>
+          <img src="images/workflow.png"/>
+        </section>
+        </section>
+            <section>
+          <section>
+            <h2>Evaluation</h2>
+            <br/>
+            <p>Developed a <span class="emph">front-end</span> for <span class="emph1">OptiML</span> and <span class="emph1">OptiGraph DSLs</span></p>
+            <p>In <span class="emph">1284 lines</span> of <span class="emph1">ported</span> application code:</p>
+            <ul>
+              <li>Obviated 96 <i>Rep</i> annotations</li>
+              <li>Obviated 5 <i>lift</i> annotations</li>
+            </ul>
+            <br/>
+            <p>Provided a <span class="emph">new interface</span> for the <span class="emph1">Slick DSL</span>:</p>
+            <ul>
+              <li>Only <span class="emph">1 month</span> of development for the front-end</li>
+              <li>~1000 lines of code</li>
+              <li>50+ tests are passing</li>
+              <li>Improves performance for <span class="emph">10 - 380 $\mu$s</span> per execution</li>
+            </ul>
+          </section>
+          </section>
+
+<section>
+      <br/><br/><br/><br/><br/><br/>
+<h2><b>Part II</b>: Automating Deep Embedding Development</h2>
+</section>
+        <section>
+            <h2>Deep Embedding Generation</h2>
+<pre><code data-trim contenteditable class="scala">
+object BigDecimal {
+  def apply(s: String): BigDecimal =
+    new BigDecimal(new JBigDecimal(s))
+}
+
+class BigDecimal(val v: JBigDecimal) {
+  def +(lhs: BigDecimal): BigDecimal =
+    new BigDecimal(v.add(lhs.v))
+  def *(lhs: BigDecimal): BigDecimal =
+    new BigDecimal(v.multiply(lhs.v))
+}
+</code></pre>
+        </section>
+<section>
+  <h2>Generating an Interface</h2>
+<pre><code data-trim contenteditable class="scala">
+trait BigDecimalOps extends Base with OverloadHack {
+  object BigDecimal {
+    def apply(s: Rep[String]): Rep[BigDecimal] = // ...
+  }
+  implicit class BigDecimalRep(self: Rep[BigDecimal]) {
+    def +(lhs: Rep[BigDecimal]): Rep[BigDecimal] = // ...
+    def *(lhs: Rep[BigDecimal]): Rep[BigDecimal] = // ...
+  }
+}
+</code></pre>
+</section>
+<section>
+<h2>Generate an Intermediate Representation</h2>
+<pre><code data-trim contenteditable class="scala">
+trait BigDecimalExp extends BigDecimalOps with BaseExp {
+  // case classes
+  case class BigDecimalNew
+    (v: Rep[BigDecimal]) extends Def[BigDecimal]
+  case class BigDecimal$plus
+    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]) extends Def[BigDecimal]
+  case class BigDecimal$times
+    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]) extends Def[BigDecimal]
+  case class Apply(s: Rep[String]) extends Def[BigDecimal]
+  // ...
+}
+</code></pre>
+        </section>
+<section>
+<h2>Generate Code Generation</h2>
+<pre><code data-trim contenteditable class="scala">
+override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
+  case BigDecimalNew(v) =>
+    stream.print("val " + quote(sym) + " = new BigDecimal")
+    stream.print("(")
+    stream.print(quote(v))
+    stream.print(")")
+    stream.println("")
+    // ...
+}
+</code></pre>
+
+</section>
+<section>
+  <h2>And Finally</h2>
+  <pre><code data-trim contenteditable class="scala">
+trait BigDecimalExpOpt extends BigDecimalExp {
+  override def bigDecimal$plus
+    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]): Rep[BigDecimal] = {
+    /* please add optimizations here */
+    super.bigDecimal$plus(self, lhs)
+  }
+  override def bigDecimal$times
+    (self: Rep[BigDecimal], lhs: Rep[BigDecimal]): Rep[BigDecimal] = {
+    /* please add optimizations here */
+    super.bigDecimal$times(self, lhs)
+  }
+  // ...
+}
+</code></pre>
+</section>
+</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: false,
+        slideNumber: true,
+        width: 1280,
+        height: 1024,
+				transition: 'none', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        // MathJax
+        { src: 'plugin/math/math.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
