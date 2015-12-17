@@ -15,6 +15,7 @@
 p { text-align: left; }
 .emph { color: red; }
 .emph1 { color:  #b30000; }
+.advantage { color:  green; }
 .central {text-align: center;}
 .smallish {font-size: 0.7em;}
 </style>
@@ -141,14 +142,15 @@ val username = (q1 join q2)
   .map(_._1.username)
           </code></pre>
           <br/>
-          <p>Embedded DSLs <span class="emph">reuse</span> the facilities of the host language </p>
+          <!-- <p>Embedded DSLs <span class="emph">reuse</span> the facilities of the host language </p>
           <br/>
-          <p>Reuse of host language facilities <span class="emph">simplifies</span> development</p>
+          <p>Reuse of host language facilities <span class="emph">simplifies</span> development</p> -->
+          <p><span class="emph">Reuse</span> of the host language facilities <span class="emph1">simplifies</span> the development process</p>
           </section>
           <section>
             <h2>Shallow Embedding</h2>
             <br/>
-            <p>Values in the embedded language are <span class="emph">directly represented</span> by the values in the host language:</p>
+            <p>Values in the embedded language are <span class="emph1">directly represented</span> by the <span class="emph">values</span> in the host language:</p>
             <pre><code data-trim contenteditable class="scala">
 val (q1, q2) = (Query[GmailAccount], Query[GithubAccount])
 val username: String = (q1 join q2)
@@ -157,14 +159,15 @@ val username: String = (q1 join q2)
     .filter({ case (_, g) => g.languageLevel > 30})
     .map(_._1.username)
             </code></pre>
-            <p><span class="emph">User friendly</span> as they fit well in the host language</p>
+            <p><span class="advantage">User friendly</span> as they fit well in the host language</p>
             <p><span class="emph">Low performance</span> due to abstraction overhead and lack of domain knowledge</p>
+            <p>TODO direct embedding</p>
           </section>
 
 
           <section>
             <h2>Deep Embedding</h2>
-            <p>Values in the embedded language are represented <span class="emph">symbolically</span> by the values in the host language</p>
+            <p>Values in the embedded language are represented <span class="emph1">symbolically</span> by the values in the host language</p>
             <pre><code data-trim contenteditable class="scala">
 // symbolic representation
 trait Rep[T]
@@ -180,8 +183,8 @@ val y: Rep[Int] = 1024
 val x: Rep[Int] = y - 1
 execute(x)
 </code></pre>
-<p>Leak internals so <span class="emph">user friendliness suffers</span></p>
-<p><span class="emph">High performance</span> due to access to the domain-knowledge</p>
+<p>Leak internals, hence <span class="emph">not user friendly</span></p>
+<p><span class="advantage">High performance</span> due to access to the domain-knowledge</p>
 
           </section>
 				<section>
