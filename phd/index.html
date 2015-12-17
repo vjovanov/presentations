@@ -89,11 +89,11 @@ WHERE  m.username = g.username
           <br/>
            <p>For a <span class="emph">DSL user</span> an external DSL:</p>
             <ul>
-              <li>Provides a <span class="emph1">friendly interface</span></li>
-              <li>Exhibits <span class="emph1">high performance</span></li>
+              <li>Provides a <span class="advantage">friendly interface</span></li>
+              <li>Exhibits <span class="advantage">high performance</span></li>
             </ul>
             <br/>
-            <p>To develop an external DSL a <span class="emph">DSL author</span> must:</p>
+            <p><span class="emph">Hard to develop</span> as the <span class="emph1">DSL author</span> must:</p>
             <ul>
               <li>Implement a parser</li>
               <li>Implement a typechecker</li>
@@ -115,7 +115,7 @@ WHERE  m.username = g.username
               <tbody>
                 <tr><td>User Friendly</td><td align="center"><font color="green">&#10003</font></td><td></td><td></td></tr>
                 <tr><td>High-Performance</td><td align="center"><font color="green">&#10003</font></td><td></td><td></td></tr>
-                <tr><td>Easy to Develop</td><td align="center"><font color="red">X</font>$^1$</td><td></td><td></td></tr>
+                <tr><td>Development Effort</td><td align="center"><font color="red">X</font>$^1$</td><td></td><td></td></tr>
               </tbody>
           </table>
             <br/>
@@ -200,7 +200,7 @@ execute(x)
               <tbody>
                 <tr><td>User Friendly</td><td align="center"><font color="green">&#10003</font></td><td align="center"><font color="red">X</font></td><td align="center"><font color="green">&#10003</font></td></tr>
                 <tr><td>High-Performance</td><td align="center"><font color="green">&#10003</font></td><td align="center"><font color="green">&#10003</font></td><td align="center"><font color="red">X</font></td></tr>
-                <tr><td >Easy to Develop</td><td align="center"><font color="red">X</font></td><td align="center">O</td><td align="center"><font color="green">&#10003</font></td></tr>
+                <tr><td>Development Effort</td><td align="center"><font color="red">X</font></td><td align="center">O</td><td align="center"><font color="green">&#10003</font></td></tr>
               </tbody>
           </table>
             <br/>
@@ -223,7 +223,7 @@ execute(x)
               <tbody>
                 <tr><td>User Friendly</td><td align="center"><font color="green">&#10003</font></td><td align="center">Part I</td></tr>
                 <tr><td>High-Performance</td></td><td align="center"><font color="green">&#10003</font></td><td align="center">Part I</td></tr>
-                <tr><td >Easy to Develop</td><td align="center"><font color="green">&#10003</font></td><td align="center">Part II</td></tr>
+                <tr><td >Development Effort</td><td align="center"><font color="green">&#10003</font></td><td align="center">Part II</td></tr>
               </tbody>
           </table>
           <br/>
@@ -460,7 +460,7 @@ new QueryDSL {
         <section>
         <section>
                 <section>
-            <h2>Error Reporting: Language Restriction</h2>
+            <h2>Error Reporting: <font class="emph1">Language Restriction</font></h2>
             <p>Direct embedding API can be richer than the deep embedding.</p>
 <pre><code data-trim contenteditable class="scala">
 new QueryDSL {
@@ -476,23 +476,17 @@ new QueryDSL {
         </section>
 
 <section>
-  <h2>Language Restriction:  <font class="emph1">Analysis</font></h2>
-
-            <p>Analise weather <font class="emph1">operations</font> in the direct embedding <font class="emph1">exist</font> in the deep embedding and report <font class="emph1">comprehensible error messages</font>.</p>
-<!-- <pre><code data-trim contenteditable class="scala">
-new QueryDSL {
-  this.Predef.println(().asInstanceOf[Rep[String]])
-}
-</code></pre> -->
+            <p><font class="emph">Analise</font> if corresponding <font class="emph1">exists</font> in the deep embedding</p>
+            <p><font class="emph">Report</font> precise <font class="emph1">errors</font>:</p>
 <pre><code data-trim contenteditable class="bash">
-&lt;error&gt; Predef.println is not supported by the DSL.
+&lt;error&gt; Predef.println is not supported by the Query DSL.
 println("Due to Nestle's good import policy.")
 ^
 </code></pre>
         </section>
         </section>
         <section>
-        <h2>Error Reporting at Host-Language Compile Time</h2>
+        <h2>Error Reporting at Host-Language <span class="emph1">Compile Time</span></h2>
             <p></p>
         </section>
         </section>
