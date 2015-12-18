@@ -459,24 +459,20 @@ new QueryDSL {
         </section>
         <section>
         <section>
-                <section>
             <h2>Error Reporting: <font class="emph1">Language Restriction</font></h2>
-            <p>Direct embedding API can be richer than the deep embedding.</p>
+            <p>Direct embedding API can be richer than the deep embedding:</p>
 <pre><code data-trim contenteditable class="scala">
-new QueryDSL {
-  this.Query(lift(Coffees)).map { c: Rep[T] =>
-    if(c.origin == lift("CH")) {
-      println("Due to Nestle's good import policy.")
-      lift("Good")
-    } else
+Query[Coffees].map {
+  (c: Coffee) =>
+    if(c.origin == "CH")
+         println("Due to Nestle's good import policy.")
+      "Good"
+    else
       c.quality
-  }
 }
 </code></pre>
-        </section>
 
-<section>
-            <p><font class="emph">Analise</font> if corresponding <font class="emph1">exists</font> in the deep embedding</p>
+            <p><font class="emph">Analise</font> if a deep operation <font class="emph1">exists</font> in the deep embedding</p>
             <p><font class="emph">Report</font> precise <font class="emph1">errors</font>:</p>
 <pre><code data-trim contenteditable class="bash">
 &lt;error&gt; Predef.println is not supported by the Query DSL.
@@ -484,13 +480,27 @@ println("Due to Nestle's good import policy.")
 ^
 </code></pre>
         </section>
-        </section>
         <section>
-        <h2>Error Reporting at Host-Language <span class="emph1">Compile Time</span></h2>
-            <p></p>
-        </section>
-        </section>
+        <h2><span class="emph">Domain-Specific</span> Errors at <span class="emph1">Compile Time</span></h2>
+            <p>Perform static analysis on the reified DSL instance</p>
+            <p>Report errors to the standard host language facilities</p>
+            <p>Simple interface for error reporting:</p>
+            <pre><code data-trim contenteditable class="scala">
+trait Position {
+  def source: File
+  def line: Int
+  def column: Int
+}
 
+trait Reporter {
+  def info(pos: Option[Position], msg: String): Unit
+  def warning(pos: Option[Position], msg: String): Unit
+  def error(pos: Option[Position], msg: String): Unit
+}
+</code></pre>
+
+        </section>
+        </section>
 
         <section>
         <section>
