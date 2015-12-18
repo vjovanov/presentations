@@ -257,7 +257,7 @@ def fact(n: Rep[Int]) = n * fact(n - 1)
 <p>always causes infinite recursion.</p>
 </section>
 <section>
-              <h2>Deep Embedding - Troubles Debugging</h2>
+              <h2>Deep Embedding: Difficult Debugging</h2>
               <br/>
               <p>Stepping inspecting values and stepping into functions:</p>
               <img src="images/debug11.png"></img>
@@ -267,7 +267,7 @@ def fact(n: Rep[Int]) = n * fact(n - 1)
             </section>
 <section>
 
-              <h2>Deep Embedding - Cryptic Type Errors</h2>
+              <h2>Deep Embedding: Cryptic Type Errors</h2>
               <br/>
               <p>A seemingly correct query:</p>
 <pre><code data-trim contenteditable class="scala">
@@ -321,7 +321,6 @@ execute(x)
 
 </section>
         <section>
-        <section>
           <h2><span class="emph">Translation</span> to the <span class="emph1">Deep Embedding</span></h2>
           <table class="reveal" >
               <thead>
@@ -353,7 +352,6 @@ execute(x)
               </tbody>
           </table>
           <img width="85%" src="images/pipeline.png"/>
-        </section>
         </section>
 
         <section>
@@ -448,15 +446,19 @@ new QueryDSL {
           </section>
         </section>
 
-        <section>
-        <section>
-          <h2><span class="emph">Reification</span> at Host-Language <span class="emph1">Compile-Time</span></h2>
-        </section>
 
         <section>
-          <h2><span class="emph">Reification</span> via <span class="emph1">Interpretation</span></h2>
+          <h2><span class="emph">Reification</span> at Host-Language <span class="emph1">Compile-Time</span></h2>
+          <br/>
+          <p><font class="emph">Translated programs</font> contain no <font class="emph1">captured variables</font></p>
+          <br/>
+          <p>They can be <font class="emph">evaluated independently</font> of the <font class="emph1">compilation context</font>.</p>
+          <br/>
+          <p>Interpret the <font class="emph">translated program</font> to acquire an instance of the <font class="emph">reified DSL</font></p>
+
+          <p>TODO: Image of the tree here.</p>
         </section>
-        </section>
+
         <section>
         <section>
             <h2>Error Reporting: <font class="emph1">Language Restriction</font></h2>
@@ -505,10 +507,17 @@ trait Reporter {
         <section>
         <section>
           <h2>Reducing Run-Time Overheads</h2>
-        </section>
 
-        <section>
-          <h2>Reducing Run-Time Overheads</h2>
+        <p>Single stage DSLs &ndash; complete compilation at host language compile-time:</p>
+        <ul>
+            <li>Use the acquired instance to generate host language code</li>
+            <li>No run-time overhead</li>
+        </ul>
+
+        <p>Two stage DSLs &ndash; cache the reified DSL body</p>
+        <ul>
+            <li>Minimal run-time overhead</li>
+        </ul>
         </section>
         </section>
 
@@ -544,7 +553,14 @@ trait Reporter {
 <h2><b>Part II</b>: Automating Deep Embedding Development</h2>
 </section>
         <section>
-            <h2>Direct Embedding Interface</h2>
+            <h2>Deep Embedding: Development Effort</h2>
+            <p>Retrofiring to the host language</p>
+            <p>Lot of boilerplate</p>
+            <p>Maintaining two versions</p>
+        </section>
+
+        <section>
+            <h2>Direct Interface Defines the Deep Interface</h2>
 <pre><code data-trim contenteditable class="scala">
 class Vector[T: Numeric](val data: Seq[T]) {
   def map[S: Numeric](f: T => S): Vector[S] =
@@ -555,29 +571,35 @@ class Vector[T: Numeric](val data: Seq[T]) {
                    .map(x => x._1 + x._2))
 }
 </code></pre>
-        </section>
-<section>
-  <h2>Generating a Deep Embedding Interface</h2>
+  <p>The deep embedding interface must be the following:</p>
 <pre><code data-trim contenteditable class="scala">
+[[framework-specific]]
 trait VectorOps extends Base {
-  implicit class VectorRep[T:Numeric:TypeTag](v: Rep[Vector[T]]) {
-    def data(implicit sc: SourceContext): Rep[Seq[T]] =
-      // ...
+  implicit class VectorRep[T:Numeric](v: Rep[Vector[T]]) {
+    def data(implicit [[framework-specific]]): Rep[Seq[T]] =
+      [[framework-specific]]
 
     def +(that: Rep[Vector[T]])
-      (implicit sc: SourceContext):Rep[Vector[T]] =
-      // ...
+      (implicit [[framework-specific]]): Rep[Vector[T]] =
+      [[framework-specific]]
 
-    def map[S:Numeric:TypeTag](f: Rep[T] => Rep[S])
-      (implicit sc: SourceContext): Rep[Vector[S]] =
-      // ...
+    def map[S](f: Rep[T] => Rep[S])(n: Numeric[S])
+      (implicit [[framework-specific]]): Rep[Vector[S]] =
+      [[framework-specific]]
   }
 }
 </code></pre>
-</section>
+        </section>
 <section>
-<h2>Generate Intermediate Representations</h2>
+<h2>Case Study: LMS</h2>
 <pre><code data-trim contenteditable class="scala">
+trait VectorOps extends Base {
+  implicit class VectorRep[T:Numeric](v: Rep[Vector[T]]) {
+    def +(that: Rep[Vector[T]])
+      (implicit sc: SourceContext): Rep[Vector[T]] =
+      vector_plus(this, that)
+  }
+}
 trait VectorExp extends VectorOps with BaseExp {
   // case classes
   case class VectorPlus[T:Numeric:TypeTag]
@@ -587,26 +609,22 @@ trait VectorExp extends VectorOps with BaseExp {
       (self: Rep[Vector[T]], v2: Rep[Vector[T]])
       (implicit sc: SourceContext): Rep[Vector[T]] =
         VectorPlus(self, v2) // IR node construction
-
   // IR constructors for ‘map‘ is elided
 }
 </code></pre>
         </section>
 <section>
-  <h2>User-Defined Optimizations</h2>
-  <pre><code data-trim contenteditable class="scala">
-trait VectorExpOpt extends VectorExp {
-  override def vector_plus[T:Numeric:TypeTag]
-    (self: Rep[Vector[T]], v2: Rep[Vector[T]]): Rep[Vector[T]] = {
-      /* please add optimizations here */
-      super.vector_plus(self, v2)
-  }
-  // ...
+  <h2>Body Translation to Preserve Semantics</h2>
+  <p>Use method <span class="emph">bodies</span>:</p>
+<pre><code data-trim contenteditable class="scala">
+class Vector[T: Numeric](val data: Seq[T]) {
+  def +(that: Vector[T]): Vector[T] =
+    new Vector(data.zip(that.data).map({
+      x => x._1 + x._2
+    }))
 }
 </code></pre>
-</section>
-<section>
-  <h2>And Finally Lowering</h2>
+<p>Define semantics of the deep embedding:</p>
   <pre><code data-trim contenteditable class="scala">
 trait VectorLowLevel extends VectorOps
       with SeqLowLevel {
@@ -619,15 +637,6 @@ trait VectorLowLevel extends VectorOps
         }))
       }
     }
-}
-</code></pre>
-<p>By using the <span class="emph">body</span> of the '+' method:</p>
-<pre><code data-trim contenteditable class="scala">
-class Vector[T: Numeric](val data: Seq[T]) {
-  def +(that: Vector[T]): Vector[T] =
-    new Vector(data.zip(that.data).map({
-      x => x._1 + x._2
-    }))
 }
 </code></pre>
 </section>
