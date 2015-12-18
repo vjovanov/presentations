@@ -636,17 +636,19 @@ trait VectorLowLevel extends VectorOps
 
 <section>
   <h2>Managing Dynamic Compilation of DSLs</h2>
-  <pre><code data-trim contenteditable class="scala">
-</code></pre>
 </section>
 
 <section>
-  <h2>Problem: Dynamic Compilation in DSLs</h2>
+  <h2>Abstraction for Tracking Program Slices</h2>
+</section>
+
+<section>
+  <h2>Show Case: Cost Function for Matrix-Chain Multiplication</h2>
   <pre><code data-trim contenteditable class="scala">
-def cost(p: Array[Int]) {
+def cost(p: SD[Array[Int]]) {
   val n = p.length - 1
-  m = Array.fill[Int](n, n)(0)
-  s = Array.fill[Int](n, n)(0)
+  m = sd(Array).fill[Int](n, n)(0)
+  s = sd(Array).fill[Int](n, n)(0)
   for (ii <- 1 until n;
        i  <- 0 until n - ii) {
     val j = i + ii
@@ -665,7 +667,15 @@ def cost(p: Array[Int]) {
 </code></pre>
 
 </section>
-
+<section>
+  <h2>Guard Execution Time</h2>
+  <p>Matrix multiplication for:</p>
+  <ul>
+    <li>3 - 8 matricesThe DSL scopes are still visible to the user</li>
+    <li>1 - 20 cache entries</li>
+  </ul>
+  </p>
+</section>
 
 <section>
   <h2>Conclusion: <span class="emph">DSLs</span> as <span class="emph1">First-Class Citizens</span></h2>
