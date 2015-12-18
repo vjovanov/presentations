@@ -611,6 +611,7 @@ trait VectorLowLevel extends VectorOps
     }
 }
 </code></pre>
+<p>By using the <span class="emph">body</span> of the '+' method:</p>
 <pre><code data-trim contenteditable class="scala">
 class Vector[T: Numeric](val data: Seq[T]) {
   def +(that: Vector[T]): Vector[T] =
@@ -619,6 +620,38 @@ class Vector[T: Numeric](val data: Seq[T]) {
     }))
 }
 </code></pre>
+</section>
+<section>
+  <h2>Evaluation</h2>
+  <br />
+  <span class="emph1">Lines of code</span> for direct EDSL, Forge specification, and deep EDSL.
+  <br />
+  <br />
+  <table class="reveal" >
+      <thead>
+        <tr><th align="left">EDSL</th><th align="center">Direct</th><th align="center">Forge</th><th align="center">Deep</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>OptiML</td>
+          <td align="right">1128</td>
+          <td align="right">1090</td>
+          <td align="right">5876</td>
+        </tr>
+        <tr>
+          <td>OptiQL</td>
+          <td align="right">73</td>
+          <td align="right">74</td>
+          <td align="right">526</td>
+        </tr>
+        <tr>
+          <td>Vector</td>
+          <td align="right">70</td>
+          <td align="right">71</td>
+          <td align="right">369</td>
+        </tr>
+      </tbody>
+  </table>
 </section>
 </section>
 			</div>
