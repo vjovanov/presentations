@@ -512,10 +512,14 @@ trait Reporter {
 </section>
         <section>
             <h2>Deep Embedding: Development Effort</h2>
-            <p>Retrofiring to the host language</p>
-            <p>Lot of boilerplate</p>
-            <p>Maintaining two versions</p>
-            <p>Solution: Deep Embedding Generation</p>
+            <p>Problems:</p>
+            <ul>
+            <li><span class="emph">Retrofitting</span> with the host language</li>
+            <li>Lots of <span class="emph1">boilerplate</span></li>
+            <li>Maintaining two versions (<span class="emph">direct</span> and <span class="emph1">deep</span>)</li>
+            </ul>
+            <p>Solution:</p>
+            <p>Generating <span class="emph1">deep</span> embedding from <span class="emph">direct</span> embedding</p>
         </section>
 
         <section>
@@ -603,6 +607,9 @@ trait VectorLowLevel extends VectorOps
 
 <section>
   <h2>Related Work and Evaluation</h2>
+  <br />
+  <p>Forge is a <span class="emph">specification EDSL</span> for generating Delite-specific deep embedding.</p>
+  <br />
   <br />
   <span class="emph1">Lines of code</span> for direct EDSL, Forge specification, and deep EDSL.
   <br />
