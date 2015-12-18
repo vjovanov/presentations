@@ -647,13 +647,31 @@ trait VectorLowLevel extends VectorOps
 </section>
 
 <section>
-  <h2>Managing Dynamic Compilation of DSLs</h2>
+  <h2>Managing <span class="emph">Dynamic Compilation</span> of <span class="emph1">DSLs</span></h2>
+  <p>Motivating example: matrix-chain multiplication</p>
+  <img src="images/costs.png"/>
+
+  <p>With the matrix multiplication DSL:</p>
+  <pre><code data-trim contenteditable class="scala">
+def multiply(m1: Matrix, m2: Matrix, m3: Matrix, m4: Matrix): Matrix =
+  laDSL {
+    m1 * m2 * m3 * m4
+  }
+</code></pre>
+<p>How to mange <span class="emph">caching</span> and when to <span class="emph">re-compile</span>?</p>
+
 </section>
 
 <section>
-  <h2>Abstraction for Tracking Program Slices</h2>
-  <p>Based on polymorphic embedding</p>
-  <p>Promote to and from type</p>
+  <h2><span class="emph">Type Abstraction</span> for Tracking <span class="emph1">Program Slices</span></h2>
+  <p>Explicitly track program slices of run-time values that affect compilation.</p>
+  <p>Based on polymorphic embedding:</p>
+  <pre><code data-trim contenteditable class="scala">
+case class SD[+T](static: Option[T], dynamic: Option[Rep[T]])
+def lift[T](v: T): SD[T]
+def escape[T](v: SD[T]): T
+</code></pre>
+  <p><span class="emph">Operations</span> on <code>SD</code> added in the <span class="emph1">same way</span> as operations on <code>Rep</code></p>
 </section>
 
 <section>
@@ -663,10 +681,10 @@ trait VectorLowLevel extends VectorOps
 <section>
   <h2>Show Case: Cost Function for Matrix-Chain Multiplication</h2>
   <pre><code data-trim contenteditable class="scala">
-def cost(p: SD[Array[Int]]) {
+def cost(p: Array[Int]) {
   val n = p.length - 1
-  m = sd(Array).fill[Int](n, n)(0)
-  s = sd(Array).fill[Int](n, n)(0)
+  m = Array.fill[Int](n, n)(0)
+  s = Array.fill[Int](n, n)(0)
   for (ii <- 1 until n;
        i  <- 0 until n - ii) {
     val j = i + ii
@@ -692,7 +710,7 @@ def cost(p: SD[Array[Int]]) {
     <li>3 - 8 matrices</li>
     <li>1 - 20 cache entries</li>
   </ul>
-  </p>
+  <img src="images/dc.png"/>
 </section>
 
 <section>
