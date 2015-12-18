@@ -166,7 +166,6 @@ val username: String = (q1 join q2)
 
           <section>
             <h2>Deep Embedding</h2>
-            TODO cite elliot's paper
             <p>Values in the embedded language are represented <span class="emph1">symbolically</span> by the values in the host language</p>
             <pre><code data-trim contenteditable class="scala">
 // symbolic representation
@@ -239,7 +238,7 @@ execute(x)
       </section>
       <section>
       <section>
-            <h2>Abstraction Leaks in the Deep Embedding</h2>
+            <h2><span class="emph">Abstraction Leaks</span> in the <span class="emph1">Deep Embedding</span></h2>
             <p>DSL types are necessarily <span class="emph">exposed</span> in the <span class="emph1">interface</span>:</p>
             <pre><code data-trim contenteditable class="scala">
 def map[U](fn: Rep[T => U]): Rep[Vector[U]]
@@ -477,9 +476,9 @@ trait Reporter {
             <li>No run-time overhead</li>
         </ul>
 <br/>
-        <p>Two stage DSLs &ndash; <font class="emph">cache</font> the <font class="emph1">reified DSL</font></p>
+        <p>Two stage DSLs &ndash; <font class="emph">cache</font> the <font class="emph1">reified DSL</font> and re-use it:</p>
         <ul>
-            <li>Minimal run-time overhead</li>
+            <li>Negligible run-time overhead</li>
         </ul>
         </section>
 
@@ -563,7 +562,8 @@ trait VectorOps extends Base {
 trait VectorExp extends VectorOps with BaseExp {
   // case classes
   case class VectorPlus[T:Numeric:TypeTag]
-             (self: Rep[Vector[T]], v2: Rep[Vector[T]]) extends Def[Vector[T]]
+             (self: Rep[Vector[T]], v2: Rep[Vector[T]])
+             extends Def[Vector[T]]
 
   def vector_plus[T:Numeric:TypeTag]
       (self: Rep[Vector[T]], v2: Rep[Vector[T]])
@@ -600,6 +600,7 @@ trait VectorLowLevel extends VectorOps
 }
 </code></pre>
 </section>
+
 <section>
   <h2>Related Work and Evaluation</h2>
   <br />
@@ -632,7 +633,58 @@ trait VectorLowLevel extends VectorOps
       </tbody>
   </table>
 </section>
+
+<section>
+  <h2>Managing Dynamic Compilation of DSLs</h2>
+  <pre><code data-trim contenteditable class="scala">
+</code></pre>
 </section>
+
+<section>
+  <h2>Problem: Dynamic Compilation in DSLs</h2>
+  <pre><code data-trim contenteditable class="scala">
+def cost(p: Array[Int]) {
+  val n = p.length - 1
+  m = Array.fill[Int](n, n)(0)
+  s = Array.fill[Int](n, n)(0)
+  for (ii <- 1 until n;
+       i  <- 0 until n - ii) {
+    val j = i + ii
+    m(i)(j) = Int.MaxValue
+    for (k <- i until j) {
+      val q = m(i)(k) +
+        m(k + 1)(j) +
+        p(i) * p(k+1) * p(j+1)
+      if (q < m(i)(j)) {
+        m(i)(j) = q
+        s(i)(j) = k
+      }
+    }
+  }
+}
+</code></pre>
+
+</section>
+
+
+<section>
+  <h2>Conclusion: DSLs as First-Class Citizens</h2>
+  <br/>
+  <p>Use DSLs without even knowing it:</p>
+  <ul>
+          <li>The DSL scopes are still visible to the user</li>
+  </ul>
+  <br/><br/><br/>
+  <p>Define DSLs as easy as any libraries.</p>
+  <ul>
+          <li>The supported language is still restricted</li>
+  </ul>
+</section>
+
+        <section>
+          <br/><br/><br/><br/>
+          <img width="50%" src="images/qa.jpg"/>
+        </section>
 			</div>
 		</div>
 
