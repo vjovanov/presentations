@@ -132,7 +132,7 @@ WHERE  m.username = g.username
           <section>
             <h2>Embedded Domain-Specific Languages</h2>
             <br/>
-            <p>DSLs <span class="emph">embedded</span> in an existing general purpose <span class="emph1">host language</span>:</p>
+            <p>DSLs <span class="emph">embedded$^1$</span> in an existing general purpose <span class="emph1">host language</span>:</p>
             <pre><code data-trim contenteditable class="scala">
 val (q1, q2) = (Query[GmailAccount], Query[GithubAccount])
 val username = (q1 join q2)
@@ -146,6 +146,7 @@ val username = (q1 join q2)
           <br/>
           <p>Reuse of host language facilities <span class="emph">simplifies</span> development</p> -->
           <p><span class="emph">Reuse</span> of the host language facilities <span class="emph1">simplifies</span> the development process</p>
+          <p style="font-size: 0.7em;">1. Paul Hudak, "Building domain-specific embedded languages", CSUR 1996.</p>
           </section>
           <section>
             <h2>Shallow Embedding</h2>
@@ -161,12 +162,13 @@ val username: String = (q1 join q2)
             </code></pre>
             <p><span class="advantage">User friendly</span> as they fit well in the host language</p>
             <p><span class="emph">Low performance</span> due to abstraction overhead and lack of domain knowledge</p>
-            <p>TODO direct embedding</p>
+            <p>We focus on <span class="emph1">direct embedding</span>, in which the types of a DSL is the same as the types in the host langauge.</p>
           </section>
 
 
           <section>
             <h2>Deep Embedding</h2>
+            TODO cite elliot's paper
             <p>Values in the embedded language are represented <span class="emph1">symbolically</span> by the values in the host language</p>
             <pre><code data-trim contenteditable class="scala">
 // symbolic representation
@@ -195,7 +197,7 @@ execute(x)
             <br/>
             <table class="reveal" >
               <thead>
-                <tr><th></th><th align="center">External DSLs</th><th align="center">Deep DSLs</th><th align="center">Shallow DSLs</th></tr>
+                <tr><th></th><th align="center">External DSLs</th><th align="center">Deep DSLs</th><th align="center">Direct DSLs</th></tr>
               </thead>
               <tbody>
                 <tr><td>User Friendly</td><td align="center"><font color="green">&#10003</font></td><td align="center"><font color="red">X</font></td><td align="center"><font color="green">&#10003</font></td></tr>
@@ -218,7 +220,7 @@ execute(x)
             <br/>
             <table class="reveal" >
               <thead>
-                <tr><th>DSL Kind</th><th align="center">Deep and Shallow Combined</th><th align="center"></th></tr>
+                <tr><th>DSL Kind</th><th align="center">Deep and Direct Combined</th><th align="center"></th></tr>
               </thead>
               <tbody>
                 <tr><td>User Friendly</td><td align="center"><font color="green">&#10003</font></td><td align="center">Part I</td></tr>
@@ -227,9 +229,9 @@ execute(x)
               </tbody>
           </table>
           <br/>
-          <p><b>Part I</b>: User friendliness matters during program development and performance in production. Use shallow embedding for program development and <span class="emph">translate</span> to the deep embedding in production.</p>
+          <p><b>Part I</b>: User friendliness matters during program development and performance in production. Use direct embedding for program development and <span class="emph">translate</span> to the deep embedding in production.</p>
 
-          <p><b>Part II</b>: Use the shallow embedding as a specification for <span class="emph">generating the deep embedding</span>. Simplify development of DSLs compiled in two stages.</p>
+          <p><b>Part II</b>: Use the direct embedding as a specification for <span class="emph">generating the deep embedding</span>.</p>
 
       </section>
 
