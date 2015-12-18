@@ -67,7 +67,7 @@ p { text-align: left; }
           <section>
             <h2>External Domain-Specific Languages</h2>
             <br/>
-            <p><span class="emph">Restricted</span> and <span class="emph1">user friendly</span> language for a specific domain:</p>
+            <p><span class="emph">Restricted</span> language crafted for a <span class="emph1">specific domain</span>:</p>
             <pre><code data-trim contenteditable class="sql lasso">
 SELECT name, email
 FROM   gmail_accounts as m, github_accounts as g
@@ -142,10 +142,8 @@ val username = (q1 join q2)
   .map(_._1.username)
           </code></pre>
           <br/>
-          <!-- <p>Embedded DSLs <span class="emph">reuse</span> the facilities of the host language </p>
-          <br/>
-          <p>Reuse of host language facilities <span class="emph">simplifies</span> development</p> -->
           <p><span class="emph">Reuse</span> of the host language facilities <span class="emph1">simplifies</span> the development process</p>
+          <br/><br/><br/><br/><br/>
           <p style="font-size: 0.7em;">1. Paul Hudak, "Building domain-specific embedded languages", CSUR 1996.</p>
           </section>
           <section>
@@ -229,9 +227,9 @@ execute(x)
               </tbody>
           </table>
           <br/>
-          <p><b>Part I</b>: User friendliness matters during program development and performance in production. Use direct embedding for program development and <span class="emph">translate</span> to the deep embedding in production.</p>
+          <p><b>Part I</b>: User friendliness matters during program development and performance in production&mdash;use direct embedding for program development and <span class="emph">translate</span> to the deep embedding in production.</p>
 
-          <p><b>Part II</b>: Use the direct embedding as a specification for <span class="emph">generating the deep embedding</span>.</p>
+          <p><b>Part II</b>: Use the <span class="emph">direct embedding</span> as a specification for <span class="emph1">generating the deep embedding</span>.</p>
 
       </section>
 
@@ -287,36 +285,8 @@ Query[Coffees].map(c =>
 map: (implicit shape: scala.ql.lifted.Shape[Any,T,G])
 :scala.slick.lifted.Query[G,T]
 </pre>
+<p>Impossible to <span class="emph">restrict</span> the <span class="emph1">embedded language</span></p>
 
-
-<p>Performs <span class="emph">domain-specific error reporting</span> at <span class="emph1">runtime</span>:</p>
-<pre>
-<font class="emph1">&lt;error&gt;</font> Can not compile a conditional expression to SQL.
-</pre>
-
-             </section>
-             <section>
-             <h2>Runtime Overheads</h2>
-             <br/>
-             <p>IR construction and DSL compilation <span class="emph">executed every time</span></p>
-            <pre><code data-trim contenteditable class="scala">
-// symbolic representation
-trait Rep[T]
-case class Const(v: Int) extends Rep[Int]
-case class Minus(l: Rep[Int], r: Rep[Int]) extends Rep[Int]
-// lifting
-implicit def lift(i: Int): Rep[Int] = Const(i)
-implicit class IntOps(l: Rep[Int]) {
-  def -(r: Rep[Int]): Rep[Int] = Minus(l, r)
-}
-
-val y: Rep[Int] = 1024
-val x: Rep[Int] = y - 1
-execute(x)
-</code></pre>
-<p>Overheads range from <span class="emph">0.2 - 24 $\mu$s</span> per line of code (LoC)$^1$</span></p>
-
-<p style="font-size: 0.7em;">1. A line of code reifies 5 IR nodes.</small>
              </section>
         </section>
 
@@ -324,10 +294,10 @@ execute(x)
 </section>
       <section>
         <section>
-          <h2><span class="emph">Translation</span> to the <span class="emph1">Deep Embedding</span></h2>
+          <h2><span class="emph">Direct Embedding</span> and  <span class="emph1">Deep Embedding</span></h2>
           <table class="reveal" >
               <thead>
-                <tr><th>Direct</th><th>Deep</th></tr>
+                <tr><th>Development</th><th>Production</th></tr>
               </thead>
               <tbody>
                 <tr><td><pre><code data-trim contenteditable class="scala">
@@ -346,10 +316,9 @@ new QueryDSL {
   lift(Query)[Coffees].map {
     (c: Rep[Coffee]) =>
       this.ifThenElse(
-        c.origin $== lift("CH"), 
+        c.origin $== lift("CH"),
         lift("Good"),
-        c.quality
-      )
+        c.quality)
     }
 }
           </code></pre></td></tr>
@@ -360,7 +329,7 @@ new QueryDSL {
           <h2><span class="emph">Translation</span> to the <span class="emph1">Deep Embedding</span></h2>
           <table class="reveal" >
               <thead>
-                <tr><th>Direct</th><th>Deep</th></tr>
+                <tr><th>Development</th><th>Production</th></tr>
               </thead>
               <tbody>
                 <tr><td><pre><code data-trim contenteditable class="scala">
@@ -399,7 +368,7 @@ new QueryDSL {
             <p>Control Constructs</p>
                 <img src="images/lang-const.png"/>
 
-            <p>Methods, value binders, pattern matching, <i>new</i>, and <i>AnyRef</i></p>
+            <p>Does not support definitions: classes, traits, and objects</p>
 
           </section>
         </section>
@@ -445,11 +414,43 @@ println("Due to Nestle's good import policy.")
 ^
 </code></pre>
         </section>
+
+
+             </section>
+             <section>
+             <h2><span class="emph">Problems</span> Related to <span class="emph1">Run-Time Compilation</span></h2>
+             <br/>
+             <p><span class="emph">IR construction</span> and DSL compilation executed <span class="emph1">every time</span></p>
+            <pre><code data-trim contenteditable class="scala">
+val y: Rep[Int] = lift(1024)
+val x: Rep[Int] = y - lift(1)
+execute(x)
+</code></pre>
+<p>Overheads range from <span class="emph">0.2 - 24 $\mu$s</span> per line of code (LoC)$^1$</span></p>
+<br/>
+<br/>
+<p><span class="emph">Domain-specific error reporting</span> happens at <span class="emph1">runtime</span>:</p>
+<pre>
+<font class="emph1">&lt;error&gt;</font> Can not compile a conditional expression to SQL.
+</pre>
+<br/><br/><br/>
+<p style="font-size: 0.7em;">1. A line of code reifies 5 IR nodes.</p>
+</section>
+<section>
+          <h2><span class="emph">Reification</span> at Host-Language <span class="emph1">Compile-Time</span></h2>
+          <br/>
+          <p><font class="emph">Translated programs</font> contain no <font class="emph1">captured variables</font></p>
+          <br/>
+          <p>Can be <font class="emph">evaluated independently</font> of the <font class="emph1">compilation context</font></p>
+          <br/>
+          <p><font class="emph">Interpret</font> the translated program to acquire an instance of the <font class="emph1">reified DSL</font></p>
+
+        </section>
         <section>
         <h2><span class="emph">Domain-Specific</span> Errors at <span class="emph1">Compile Time</span></h2>
-            <p>Perform static analysis on the reified DSL instance</p>
-            <p>Report errors to the standard host language facilities</p>
-            <p>Simple interface for error reporting:</p>
+            <p>Perform <font class="emph">domain-specific analysis</font> on the <font class="emph1">reified DSL</font> instance</p>
+            <p>Report <font class="emph">errors</font> with the standard <font class="emph1">host-language</font> error reporting</p>
+            <p>Simple author-facing <font class="emph">interface</font> for <font class="emph1">error reporting</font>:</p>
             <pre><code data-trim contenteditable class="scala">
 trait Position {
   def source: File
@@ -467,29 +468,16 @@ trait Reporter {
         </section>
         </section>
 
-
-        <section>
-          <h2><span class="emph">Reification</span> at Host-Language <span class="emph1">Compile-Time</span></h2>
-          <br/>
-          <p><font class="emph">Translated programs</font> contain no <font class="emph1">captured variables</font></p>
-          <br/>
-          <p>They can be <font class="emph">evaluated independently</font> of the <font class="emph1">compilation context</font>.</p>
-          <br/>
-          <p>Interpret the <font class="emph">translated program</font> to acquire an instance of the <font class="emph">reified DSL</font></p>
-
-          <p>TODO: Image of the tree here.</p>
-        </section>
-
         <section>
           <h2>Reducing Run-Time Overheads</h2>
-
-        <p>Single stage DSLs &ndash; complete compilation at host language compile-time:</p>
+          <br/>
+        <p>Single stage DSLs &ndash; execute <font class="emph">DSL compilation</font> at host-language <font class="emph1">compile time</font>:</p>
         <ul>
             <li>Use the acquired instance to generate host language code</li>
             <li>No run-time overhead</li>
         </ul>
-
-        <p>Two stage DSLs &ndash; cache the reified DSL body</p>
+<br/>
+        <p>Two stage DSLs &ndash; <font class="emph">cache</font> the <font class="emph1">reified DSL</font></p>
         <ul>
             <li>Minimal run-time overhead</li>
         </ul>
