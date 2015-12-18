@@ -525,7 +525,7 @@ trait Reporter {
         </section>
 
         <section>
-            <h2>Direct Interface Defines the Deep Interface</h2>
+            <h2>Direct Interface <span class="emph">Defines</span> the Deep Interface</h2>
 <pre><code data-trim contenteditable class="scala">
 class Vector[T: Numeric](val data: Seq[T]) {
   def map[S: Numeric](f: T => S): Vector[S] =
@@ -655,7 +655,7 @@ def multiply(m1: Matrix, m2: Matrix, m3: Matrix, m4: Matrix): Matrix =
     m1 * m2 * m3 * m4
   }
 </code></pre>
-<p>How to mange <span class="emph">caching</span> and when to <span class="emph">re-compile</span>?</p>
+<p>How to mange <span class="emph">caching</span> and decide when to <span class="emph">re-compile</span>?</p>
 
 </section>
 
@@ -670,7 +670,7 @@ def escape[T](v: SD[T]): T
 </code></pre>
   <p><span class="emph">Operations</span> on <code>SD</code> added in the <span class="emph1">same way</span> as operations on <code>Rep</code></p>
 
- <p><span class="emph">Provide high-level abstractions based on the primitives</p>
+ <p>Provide <span class="emph">high-level abstractions</span> based on the primitives</p>
 </section>
 
 <section>
@@ -725,12 +725,12 @@ def cost(p: Array[Int]) {
 <section>
   <h2>Conclusion: <span class="emph">DSLs</span> as <span class="emph1">First-Class Citizens</span></h2>
   <br/>
-  <p><span class="emph">Goal 1</span>: use DSLs without even knowing it.</p>
+  <p><span class="emph">Goal 1</span>: use DSLs without even knowing it</p>
   <ul>
     <li>The DSL scopes are still visible to the user</li>
   </ul>
   <br/><br/><br/>
-  <p><span class="emph">Goal 2</span>: define DSLs as easy as libraries.</p>
+  <p><span class="emph">Goal 2</span>: define DSLs as easy as libraries</p>
   <ul>
           <li>The supported language is still restricted</li>
   </ul>
