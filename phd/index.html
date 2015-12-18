@@ -673,11 +673,20 @@ def escape[T](v: SD[T]): T
 </code></pre>
   <p><span class="emph">Operations</span> on <code>SD</code> added in the <span class="emph1">same way</span> as operations on <code>Rep</code></p>
 
- <p><span class="emph">Operations</span> on <code>SD</code> added in the <span class="emph1">same way</span> as operations on <code>Rep</code></p>
+ <p><span class="emph">Provide high-level abstractions based on the primitives</p>
 </section>
 
 <section>
   <h2>Program Slices During Executions</h2>
+  <pre><code data-trim contenteditable class="scala">
+def sgn(v:  Int): Int = dsl {
+  if (v > 0) math.POSTIVE
+  else if (v < 0) math.NEGATIVE
+  else math.ZERO
+}
+
+sgn(1); sgn(0);
+</code></pre>
   <img src="images/slices.png"/>
 </section>
 
