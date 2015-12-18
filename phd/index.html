@@ -246,15 +246,15 @@ execute(x)
             <pre><code data-trim contenteditable class="scala">
 def map[U](fn: Rep[T => U]): Rep[Vector[U]]
 </code></pre>
-<p>Type <code data-trim contenteditable class="scala">Rep[T => U]</code> raises questions:</p>
+<p>Type <code data-trim contenteditable class="scala">Rep</code> raises questions:</p>
 <ul>
   <li>Is <code data-trim contenteditable class="scala">Rep[T => U]</code> a function? How is it applied correctly?</li>
   <li>Why not <code data-trim contenteditable class="scala">Rep[T] => Rep[U]</code>?</li>
-  <li>Why not <code data-trim contenteditable class="scala">Vector[Rep[T]]</code>?</li>
+  <li>Why not <code data-trim contenteditable class="scala">Vector[Rep[U]]</code> instead of <code data-trim contenteditable class="scala">Rep[Vector[U]]</code>?</li>
 </ul>
 <p>Defining <span class="emph">recursive</span> functions becomes <span class="emph1">complicated</span>:</p>
 <pre><code data-trim contenteditable class="scala">
-def fact(n: Rep[Int]) = n * fact(n - 1)
+def fact(n: Rep[Int]) = if(n > 1) n * fact(n - 1) else 1
 </code></pre>
 <p>always causes infinite recursion.</p>
 </section>
@@ -271,7 +271,7 @@ def fact(n: Rep[Int]) = n * fact(n - 1)
 
               <h2>Deep Embedding: Cryptic Type Errors</h2>
               <br/>
-              <p>A seemingly correct query:</p>
+              <p>A <span class="emph">seemingly correct</span> query:</p>
 <pre><code data-trim contenteditable class="scala">
 Query[Coffees].map(c =>
   if(c.origin == "CH")
@@ -280,7 +280,7 @@ Query[Coffees].map(c =>
     c.quality
 )
 </code></pre>
-<p>Yields incomprehensible type errors:</p>
+<p>Yields <span class="emph1">incomprehensible type errors</span>:</p>
 <pre>
 <font class="emph1">&lt;error&gt;</font> Don’t know how to unpack Any to T and pack to G
 <font class="emph1">&lt;error&gt;</font> Not enough arguments in method
@@ -289,7 +289,7 @@ map: (implicit shape: scala.ql.lifted.Shape[Any,T,G])
 </pre>
 
 
-<p>Performs domain-specific error reporting at runtime:</p>
+<p>Performs <span class="emph">domain-specific error reporting</span> at <span class="emph1">runtime</span>:</p>
 <pre>
 <font class="emph1">&lt;error&gt;</font> Can not compile a conditional expression to SQL.
 </pre>
@@ -322,6 +322,40 @@ execute(x)
 
 
 </section>
+      <section>
+        <section>
+          <h2><span class="emph">Translation</span> to the <span class="emph1">Deep Embedding</span></h2>
+          <table class="reveal" >
+              <thead>
+                <tr><th>Direct</th><th>Deep</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><pre><code data-trim contenteditable class="scala">
+{
+  Query[Coffees].map {
+    (c: Coffee) =>
+      if(c.origin == "CH")
+        "Good"
+      else
+        c.quality
+    }
+}
+          </code></pre>
+                </td><td><pre><code data-trim contenteditable class="scala">
+new QueryDSL {
+  lift(Query)[Coffees].map {
+    (c: Rep[Coffee]) =>
+      this.ifThenElse(
+        c.origin $== lift("CH"), 
+        lift("Good"),
+        c.quality
+      )
+    }
+}
+          </code></pre></td></tr>
+              </tbody>
+          </table>
+        </section>
         <section>
           <h2><span class="emph">Translation</span> to the <span class="emph1">Deep Embedding</span></h2>
           <table class="reveal" >
@@ -355,6 +389,7 @@ execute(x)
           </table>
           <img width="85%" src="images/pipeline.png"/>
         </section>
+        </section>
 
         <section>
             <h2>Translation: <span class="emph1">Language Virtualization</span></h2>
@@ -369,65 +404,6 @@ execute(x)
           </section>
         </section>
         <section>
-          <section>
-            <h2>Translation: <span class="emph1">Constants and Free Variables</span></h2>
-</code></pre>
-<pre><code data-trim contenteditable class="scala">
-  def lift[T, Ret](v: T)
-    (implicit liftEv: LiftEvidence[T, Ret]): Ret =
-      liftEv.lift(v)
-</code></pre>
-<pre><code data-trim contenteditable class="scala">
-new QueryDSL {
-  this.Query(Coffees).map(c =>
-    if(c.origin == "CH")
-      "Good"
-    else
-      c.quality
-  )
-}
-</code></pre>
-          </section>
-          <section>
-            <h2>Translation: <span class="emph1">Types</span></h2>
-            <p>Generic Polymorphic Embedding</p>
-               \[\begin{aligned}
-               &\tau_{arg}(T) & = & \; T \\
-             &\tau(T) & = & \; Rep [ T ]
-                         \end{aligned}\]
-            </p>
-            <p>Eager Inlining (disabled function virtualization)</p>
-            \[\begin{aligned}
-
-&\tau_{arg}(T_1 \Rightarrow T_2) &=& \; \mathtt{error} \\
-&\tau_{arg}(T) & = & \; T \\
-&\tau(T_1 \Rightarrow T_2) & = & \; \tau(T_1) \Rightarrow \tau(T_2) \\
-&\tau(T) & = & \; Rep[T]
-                         \end{aligned}\]
-          <p>Custom Types</p>
-          \[\begin{aligned}
-&\tau_{arg}(T) &  =  & \; this.T\\
-&\tau(T) &  =  & \; this.T\\
-                         \end{aligned}\]
-
-          </section>
-          <section>
-            <h2>Translation: <span class="emph1">Operations</span></h2>
-            <br/>
-            <p>Maps <span class="emph">direct operations</span> to the <span class="emph1">deep operations</span></p>
-            <ul>
-            <li>Defined as a composition of <i>inject</i> and <i>rebind</i></li>
-            </ul>
-            <br/>
-            <p>Operation <i>inject</i> <span class="emph">injects the deep operations in the scope</p>
-            $\;[dsl] \; = \; \mathbf{new}\;\;dDSL\;\;\{\;\;\mathbf{def}\;\;\mathtt{main}():\;\;\tau(T)\;=\;dsl\;\}$
-            <br/>
-            $[dsl] \; = \; \mathbf{val}\;\;c \; = \; \mathbf{new}\;\;dDSL;\;\;\;\mathbf{import}\;\;c.\_;\;\;\;dsl$
-            <br/>
-
-            <p>Operation <i>rebind</i> maps a direct operation to a deep operation</p>
-          </section>
-          <section>
             <h2><span class="emph">Translation</span> Preserves <span class="emph1">Well-Typedness</span></h2>
             <br/>
             <p>Generic Polymorphic Embedding</p>
@@ -444,21 +420,6 @@ new QueryDSL {
             <ul>
             <li>Correctness <span class="emph">depends</span> on the deep embedding <span class="emph1">implementation</span></li>
             </ul>
-
-          </section>
-        </section>
-
-
-        <section>
-          <h2><span class="emph">Reification</span> at Host-Language <span class="emph1">Compile-Time</span></h2>
-          <br/>
-          <p><font class="emph">Translated programs</font> contain no <font class="emph1">captured variables</font></p>
-          <br/>
-          <p>They can be <font class="emph">evaluated independently</font> of the <font class="emph1">compilation context</font>.</p>
-          <br/>
-          <p>Interpret the <font class="emph">translated program</font> to acquire an instance of the <font class="emph">reified DSL</font></p>
-
-          <p>TODO: Image of the tree here.</p>
         </section>
 
         <section>
@@ -468,10 +429,10 @@ new QueryDSL {
 <pre><code data-trim contenteditable class="scala">
 Query[Coffees].map {
   (c: Coffee) =>
-    if(c.origin == "CH")
-         println("Due to Nestle's good import policy.")
+    if(c.origin == "CH") {
+      println("Due to Nestle's good import policy.")
       "Good"
-    else
+    } else
       c.quality
 }
 </code></pre>
@@ -506,7 +467,19 @@ trait Reporter {
         </section>
         </section>
 
+
         <section>
+          <h2><span class="emph">Reification</span> at Host-Language <span class="emph1">Compile-Time</span></h2>
+          <br/>
+          <p><font class="emph">Translated programs</font> contain no <font class="emph1">captured variables</font></p>
+          <br/>
+          <p>They can be <font class="emph">evaluated independently</font> of the <font class="emph1">compilation context</font>.</p>
+          <br/>
+          <p>Interpret the <font class="emph">translated program</font> to acquire an instance of the <font class="emph">reified DSL</font></p>
+
+          <p>TODO: Image of the tree here.</p>
+        </section>
+
         <section>
           <h2>Reducing Run-Time Overheads</h2>
 
@@ -521,15 +494,12 @@ trait Reporter {
             <li>Minimal run-time overhead</li>
         </ul>
         </section>
-        </section>
 
-        <section>
         <section>
           <h2>Putting it All Together</h2>
           <img src="images/workflow.png"/>
         </section>
         </section>
-            <section>
           <section>
             <h2>Evaluation</h2>
             <br/>
@@ -548,7 +518,6 @@ trait Reporter {
               <li>Improves performance for <span class="emph">10 - 380 $\mu$s</span> per execution</li>
             </ul>
           </section>
-          </section>
 
 <section>
       <br/><br/><br/><br/><br/><br/>
@@ -559,6 +528,7 @@ trait Reporter {
             <p>Retrofiring to the host language</p>
             <p>Lot of boilerplate</p>
             <p>Maintaining two versions</p>
+            <p>Solution: Deep Embedding Generation</p>
         </section>
 
         <section>
@@ -605,7 +575,7 @@ trait VectorOps extends Base {
 trait VectorExp extends VectorOps with BaseExp {
   // case classes
   case class VectorPlus[T:Numeric:TypeTag]
-             (self: Rep[T], v2: Rep[Int]) extends Def[Vector[T]]
+             (self: Rep[Vector[T]], v2: Rep[Vector[T]]) extends Def[Vector[T]]
 
   def vector_plus[T:Numeric:TypeTag]
       (self: Rep[Vector[T]], v2: Rep[Vector[T]])
@@ -643,7 +613,7 @@ trait VectorLowLevel extends VectorOps
 </code></pre>
 </section>
 <section>
-  <h2>Evaluation</h2>
+  <h2>Related Work and Evaluation</h2>
   <br />
   <span class="emph1">Lines of code</span> for direct EDSL, Forge specification, and deep EDSL.
   <br />
